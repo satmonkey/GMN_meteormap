@@ -1,0 +1,28 @@
+HELP
+
+GMN Meteor Map is a multipurpose trajectory/orbit viewer, based on the data produced by GMN trajectory solver at the UWO, Canada.
+
+Usage:
+
+- Select the date/time span you are interested in and click on Update. Default range is last 3 days
+- Review the results and modify your filter as needed
+- Orbits are updated with UWO every 2 hours, however you can force the update (2 last daily files) manually by clicking on the "Quick download" button
+- If interested in particular sky area, see the radiant plot and then put the window coordinates into x1,x2,y1,y2 filter (of the currently chosen dimeneion)
+
+Using station filter:
+Put the stations starting characters, divided by comma
+
+Using shower filter:
+Put the shower(s) code (https://www.ta3.sk/IAUC22DB/MDC2022/), divided by comma
+
+Ground plot:
+- lines are colored by peak magnitude
+
+Radiant Plot:
+- choose dimensions on x, y and z axis
+- choose projection
+- choose rasterize for large data (currently buggy for Sinusoidal projection)
+- you can zoom in/out, pan etc. by using controls in the upper right corner
+- points are sized by a peak magnitude
+
+It is advisable to use as much filtering as possible, to avoid data overload in the browser.
