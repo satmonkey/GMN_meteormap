@@ -19,3 +19,4 @@ Then, you can run the app e.g.:
 Then, point your browser to: http://localhost:8080
 
 This code contains a small sample database, enabling the code to run in a minimized way
+Tested on Python 3.10
