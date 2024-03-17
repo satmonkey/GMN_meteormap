@@ -1,5 +1,5 @@
-# GMN_meteormap
-GMN Meteor Map is a multipurpose trajectory/orbit viewer, based on the data produced by GMN trajectory solver at the UWO, Canada
+# GMN meteormap
+GMN Meteor Map is a multipurpose trajectory/orbit viewer, based on the data produced by Global Meteor Network trajectory solver.
 
 For more information, visit:
 
@@ -18,5 +18,5 @@ Then, you can run the app e.g.:
 
 Then, point your browser to: http://localhost:8080
 
-This code contains a small sample database, enabling the code to run in a minimized way
+This code contains a small sample database, enabling the code to run in a minimalistic way
 
