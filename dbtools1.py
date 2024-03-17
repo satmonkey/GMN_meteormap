@@ -1,30 +1,17 @@
 import datetime
-
 import pandas as pd
 import geopandas as gpd
-#import sqlite3
 import pysqlite3 as sqlite3
-#import spatialite
 import time
-#from numpy import genfromtxt
-#import numpy as np
 import os
 import sys
-
 import config
-#import dbtools
 
 # location of proj.db on windows
 if sys.platform == 'win32':
     os.environ['PROJ_LIB'] = r'd:\OSGeo4W\share\proj'
-#import csv
 import glob
-#import string
 from urllib.parse import urlparse
-#SPATIALITE = "/usr/local/lib/mod_spatialite.dylib"
-#SPATIALITE_LIBRARY_PATH = 'mod_spatialite'
-#import dbtools
-#import Orbits
 import pickle
 from fiona.drvsupport import supported_drivers
 from shapely.geometry import Point
@@ -33,8 +20,6 @@ db = "gmn03.db"  # Database filename
 table_base = "traj_sum"
 supported_drivers['LIBKML'] = 'rw'
 supported_drivers['KML'] = 'rw'
-print('setting PROJ_LIB...')
-#os.environ['PROJ_LIB'] = r'd:\OSGeo4W\share\proj'
 
 orbit_fields = {
     "0":    "traj_id",
@@ -406,35 +391,14 @@ def Fetch_Orbits(id_list):
     conn.close()
     return orbits
 
-#
+
 def Fetch_Data(t1, t2, filt_list, iau_list, x, y, zoom_box):
     data = None
     # spatialite syntax using WKT (string) data
-    #sql = "SELECT *,ST_GeomFromText('LINESTRING(' || LonBeg || ' ' || LatBeg || ','  || LonEnd || ' ' || LatEnd || ')') as geometry FROM " + table + " where (stations like '"
-    # spatialite syntax using WKB (BLOB) data
-    #sql = "SELECT DISTINCT traj_sum.* FROM " + table_base + " JOIN trajs ON traj_id = traj  where (Stations like '"
-
     sql = "SELECT DISTINCT traj_sum.* FROM " + table_base + " JOIN trajs ON traj_id = traj where (Stations like '"
     for filt in filt_list:
         sql = sql + filt + "%' OR Stations like '%," + filt + "%' OR Stations like '"
     sql = sql + "DEADBEEF') AND ("
-
-    #if filt_list[0] == '':
-    #    filt_list = []
-    #filtt = ''
-    #for filt in filt_list:
-    #    filtt = filtt + "'" + filt + "'" + ","
-    #    #sql = sql + filt + "%' OR Stations like '%," + filt + "%' OR Stations like '"
-    #filtt = filtt[:-1]
-    #if len(filt_list) > 0:
-    #    sql = sql + " substr(station,1,2) IN (" + filtt + ") AND "
-
-    
-    #for filt in filt_list:
-    #    sql = sql + filt + "%' OR Stations like '%," + filt + "%' OR Stations like '"
-    #sql = sql + "DEADBEEF') AND ("
-    
-
 
     # zoom filter
     sql = sql + "(" + x + " between " + zoom_box[0] + " AND " + zoom_box[1] + ") AND (" + \
@@ -598,8 +562,6 @@ def MergeMonthsToYear(year):
     c = conn.cursor()
     c.execute("DROP TABLE IF EXISTS " + name)
     conn.commit()
-    #c.execute("CREATE TABLE " + name)
-    #conn.commit()
     sql_tables = "select name from sqlite_master where name like '%monthly_" + year + "%'"
     tables = pd.read_sql_query(sql_tables, conn)
     tables = tables.values.tolist()
@@ -610,8 +572,6 @@ def MergeMonthsToYear(year):
     sql = sql[:-7]
     c.execute(sql)
     conn.commit()
-    #sql = "SELECT * FROM  into "
-    #c.execute(sql)
     conn.close()
 
 
@@ -656,8 +616,6 @@ def MergeMonthsToYear_by_append(year):
     name = "traj_summary_yearly_" + year
     conn = Connect_DB(db)
     c = conn.cursor()
-    #c.execute("DROP TABLE IF EXISTS " + name)
-    #conn.commit()
     sql_tables = "select name from sqlite_master where name like '%monthly_" + year + "%'"
     tables = pd.read_sql_query(sql_tables, conn)
     tables = tables.values.tolist()
@@ -668,8 +626,6 @@ def MergeMonthsToYear_by_append(year):
         #sql = sql[:-7]
         c.execute(sql)
         conn.commit()
-    #sql = "SELECT * FROM  into "
-    #c.execute(sql)
     conn.close()
 
 
@@ -759,10 +715,7 @@ def LoadStationCoords():
                 'lat': lats,
                 'lon': lons,
             })
-    #coords_df['wkt'] = coords_df[['lon', 'lat']].values.tolist()
-    #print(coords_df['wkt'][0])
     gs = gpd.points_from_xy(coords_df['lon'], coords_df['lat'])
-
     coords_gdf = gpd.GeoDataFrame(coords_df, crs="EPSG:4326", geometry=gs)
     coords_gdf["geometry"] = coords_gdf["geometry"].apply(Point)
 
@@ -785,13 +738,10 @@ def AddFOV(filt_list):
     if filt_list[0] == '':
         filt_list = ['%']
     conn = Connect_DB(db)
-    #c = conn.cursor()
-
     sql = "SELECT station, fov as fov FROM fov100 where station like '"
     for filt in filt_list:
         sql = sql + filt + "%' OR station like '"
     sql = sql + "DEADBEEF'"
-    #c.execute(sql)
     print(sql)
     fov = gpd.read_postgis(sql, conn, geom_col='fov')
     conn.close()
@@ -803,10 +753,6 @@ def AddCoords(filt_list):
     if filt_list[0] == '':
         filt_list = ['%']
     conn = Connect_DB_ro(db)
-    #c = conn.cursor()
-
-    #sql = "SELECT id, geometry FROM stations where id like '"
-
     # randomize lat and lon
     sql = "SELECT DISTINCT id, AsBinary(GeomFromText('POINT(' || (X(GeomFromWKB(geometry)) + cast(random() % 200 as REAL)/50000) || ' ' || \
             (Y(GeomFromWKB(geometry)) + cast(random() % 200 as REAL)/50000) || ')' )) as geometry from stations where id like '"
@@ -830,13 +776,6 @@ def FetchLastTime():
     conn.close()
     return data
 
-
-def test():
-    ...
-    # SELECT count(date(Date_m)) FROM traj_summary_monthly_202209 where stations like 'DE%'  group by date(Date_m)
-
-
-
 if __name__ == "__main__":
     t = time.time()
     stations_file_name = 'https://globalmeteornetwork.org/data/kml_fov/'
@@ -851,12 +790,9 @@ if __name__ == "__main__":
     conn = Connect_DB(db)  # Create DB
     #print(traj_count())
 
-
     #months = Load_period_table_list('month')
     #for month in months:
     #    Load_period(month, 'month')
-
-
 
     #Load_last2_days()
 
@@ -865,8 +801,6 @@ if __name__ == "__main__":
     LoadAllKMLFiles()
 
     #Load_all_days()
-    
-
     #MergeMonthsToYear_by_append('2021')
     #print(data[0])
     conn.close()
