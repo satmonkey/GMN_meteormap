@@ -32,7 +32,7 @@ global plt
 pn.extension('tabulator')
 pn.extension(loading_spinner='dots', loading_color='#00aa41', sizing_mode="stretch_both")
 pn.extension()
-pn.config.defer_load = True
+#pn.config.defer_load = True
 pn.config.console_output = 'replace'
 
 
