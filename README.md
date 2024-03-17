@@ -9,7 +9,7 @@ https://globalmeteornetwork.org/data/traj_summary_data/daily/
 
 To clone the repository, use:
 
-`git clone --recurse-submodules https://github.com/satmonkey/GMN_meteormap`
+`git clone https://github.com/satmonkey/GMN_meteormap`
 
 To run the code, install the modules as mentioned in the requirements.txt
 Then, you can run the app e.g.:
