@@ -126,7 +126,7 @@ class RadiantPlot(param.Parameterized):
             plot = None
         return plot
 
-
+    # rasterize checkbox changed
     @param.depends('rasterize', watch=True)
     def update_shade(self):
         #self.c_map = cc.m_rainbow
@@ -151,7 +151,7 @@ class RadiantPlot(param.Parameterized):
                 }
         ...
 
-
+    # dimension for x-axis changed
     @param.depends('x', watch=True)
     def update_x(self):
         if self.x in ['SCE_h', 'SCE_g']:
@@ -169,7 +169,7 @@ class RadiantPlot(param.Parameterized):
             #xx1, xx2 = (0,360)
             #x_ticks = (0, 45, 90, 135, 180, 225, 270, 315, 360)
 
-
+    # dimension for z-axis changed
     @param.depends('c', watch=True)
     def update_c(self):
         if self.c == 'shower_code':
@@ -183,7 +183,7 @@ class RadiantPlot(param.Parameterized):
             #self.aggregator = ds.sum(self.c)
             self.c_map = cc.m_rainbow_r
 
-
+    # projection changed
     @param.depends('proj', watch=True)
     def update_proj(self):
 
