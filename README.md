@@ -11,10 +11,10 @@ To clone the repository, use:
 
 `git clone https://github.com/satmonkey/GMN_meteormap`
 
-To run the code, install the modules as mentioned in the requirements.txt
+To run the code, create the python virtual environment and install the modules as mentioned in the requirements.txt
 Then, you can run the app e.g.:
 
-`panel serve map3.py --static-dirs assets=assets --address 0.0.0.0 --port 8080 --allow-websocket-origin="*" --reuse-sessions --log-level debug`
+`panel serve map3.py --static-dirs assets=assets --address 0.0.0.0 --port 8080 --allow-websocket-origin="*" --log-level debug`
 
 Then, point your browser to: http://localhost:8080
 
