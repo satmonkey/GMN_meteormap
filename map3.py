@@ -35,15 +35,6 @@ pn.extension()
 pn.config.defer_load = True
 pn.config.console_output = 'replace'
 
-#js_files = {'sortable': os.path.join(base.module_path,'./assets/js/main.js')}
-#js_files={'main': './assets/js/main.js'}
-#pn.config.js_files = js_files
-#pn.config.defer_load = True
-
-#traj_counter = dbtools.traj_count()
-
-#gv.extension('bokeh')
-#pd.options.plotting.backend = 'holoviews'
 
 css = '''
 .bk.panel-widget-box {
@@ -401,7 +392,6 @@ def update_map_pane(event):
     meteors = []
     print("Updating...", filt.value_input, iau.value_input)
     status.value = 'Updating data'
-    #traj_counter.value = dbtools.traj_count()
     file_suffix = '_' + "dummy"
 
     global update_param
@@ -410,10 +400,6 @@ def update_map_pane(event):
 
     # create the new folium map from the scratch
     map = get_map()
-    #map.get_root().html.add_child(fm.JavascriptLink(pn.config.js_files['main']))
-
-    # turn on the loading wheels
-
 
     # split the filter elements, if used
     filt_list = filt.value_input.split(',')
@@ -435,32 +421,15 @@ def update_map_pane(event):
     print(time_last.value[0][0][:-7])
     time_last.value = time_last.value[0][0][:-7]
 
-
     # main select DB query
     # fetch list of ID's based on filter
     id_list = dbtools.Fetch_IDs(dt1.value, dt2.value, filt_list, iau_list, rp.x, rp.y, zoom_box)
 
-
-    # fetch orbits saved as pickles
-    #orbits = dbtools.Fetch_Orbits(id_list)
-    #o_count.value = len(orbits)
-
-    # fetch meteors saved as geodataframe
-    #meteors = dbtools.Fetch_Data(dt1.value, dt2.value, filt_list, iau_list, rp.x, rp.y, zoom_box)
-    #if len(id_list) > 0:
     print(len(id_list))
     print("Fetching meteors...")
     meteors = dbtools.Fetch_Meteors(id_list)
     meteors = meteors[:100000]
     t_count.value = str(meteors.shape[0])
-    #else:
-    #    t_count.value = 0
-    #    try:
-    #        view.loading = False
-    #    except:
-    #        ...
-    #    return
-
 
     # Updating the Folium meteor map
     #######################################
@@ -533,14 +502,6 @@ def update_map_pane(event):
     #meteors_pd = pd.DataFrame(meteors)
     meteors_pd['utc'] = pd.to_datetime(meteors_pd['utc'])
     meteors_pd['day'] = meteors_pd['utc'].dt.dayofyear
-    #meteors_pd['SCE_g'] = meteors_pd['L_g'] - meteors_pd['la_sun']
-    #meteors_pd['SCE_h'] = meteors_pd['L_h'] - meteors_pd['la_sun']
-    #meteors_pd['SCE_g'] = meteors_pd['SCE_g'] + (360 * (meteors_pd['SCE_g'] < 0))
-    #meteors_pd['SCE_h'] = meteors_pd['SCE_h'] + (360 * (meteors_pd['SCE_h'] < 0))
-
-    #geometry = [Point(xy) for xy in zip(meteors_pd['SCE_h'], meteors_pd['L_h'])]
-    #meteors_gd = gpd.GeoDataFrame(meteors_pd, geometry=geometry, crs=4326)
-
 
     # limit HVPLOT to 5 000 points
     #if len(meteors_pd) > 5000:
@@ -578,7 +539,6 @@ def update_map_soft(event):
 
 
 # reload last 2 days
-# @param.depends(refresh_days.param.value)
 @param.depends(quick_download.param.value, watch=True)
 def update_map_pane_period(dayss):
     folium_pane.loading = True
@@ -596,8 +556,6 @@ def update_map_pane_period(dayss):
     else:
         print("No new records found")
         status.value = "No new records found"
-
-
 
 
 @pn.depends(dv.param.value)
