@@ -4,6 +4,7 @@ GMN Meteor Map is a multipurpose trajectory/orbit viewer, based on the data prod
 For more information, visit:
 
 https://globalmeteornetwork.org
+
 https://globalmeteornetwork.org/data/traj_summary_data/daily/
 
 To run the code, install the modules as mentioned in the requirements.txt
