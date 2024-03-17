@@ -630,7 +630,7 @@ folium_pane = pn.pane.plot.Folium(sizing_mode="stretch_both", margin=0, min_heig
 
 
 #radiant_phvplot = pn.bind(radiant_hvplot, dv, x, y, c, kind, rasterize, proj)
-time_phvplot = pn.bind(time_hvplot, dv)
+#time_phvplot = pn.bind(time_hvplot, dv)
 
 view = pn.Row(
     pn.Column(
