@@ -742,7 +742,7 @@ view = pn.Row(
                     sizing_mode='stretch_both', max_height=750, max_width=1650
                 ),
             ),            
-            sizing_mode='fixed', height=780, width=1650,
+            sizing_mode='stretch_width', height=780, width=1650,
         ),
         pn.Row(
             t_count,
@@ -751,7 +751,7 @@ view = pn.Row(
             traj_counter,
             sizing_mode='fixed', margin=0, height=30, width=1000
         )
-    ),  sizing_mode='fixed', max_height=830, max_width=1680
+    ),  sizing_mode='stretch_width', max_height=830, max_width=1900
 )
 
 
