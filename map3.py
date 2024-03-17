@@ -418,8 +418,11 @@ def update_map_pane(event):
 
     # update last record time
     time_last.value = dbtools.FetchLastTime()
-    print(time_last.value[0][0][:-7])
-    time_last.value = time_last.value[0][0][:-7]
+    try:
+        print(time_last.value[0][0][:-7])
+        time_last.value = time_last.value[0][0][:-7]
+    except:
+        time_last.value = "No time set yet"
 
     # main select DB query
     # fetch list of ID's based on filter
