@@ -2,6 +2,7 @@ import os
 import panel as pn
 import folium as fm
 from folium.plugins import BeautifyIcon
+from folium.plugins import Search
 import matplotlib.pyplot as plt
 import pandas as pd
 import geopandas as gpd
