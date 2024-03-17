@@ -1,0 +1,3 @@
+[submodule "WesternMeteorPyLib"]
+	path = WesternMeteorPyLib
+	url = https://github.com/wmpg/WesternMeteorPyLib
