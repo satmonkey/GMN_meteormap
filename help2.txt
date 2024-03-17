@@ -1,24 +1,24 @@
 Dimensions used:
 
-v_init				Initial speed (trajectory start point)
-v_g       		Geocentric velocity (m/s)
-v_h           Helioventric velocity of the meteor (m/s)
-rend_ele			End height
-peak_magn			Peak magnitude
-duration			Visible trajectory duration (s)
-ra_g, dec_g 	Geocentric coordinates
-L_g, B_g      Geocentric ecliptic coordinates
-L_h, B_h      Heliocentric ecliptic coordinates
-SCE_g					Geocentric ecliptic coordinates relative to solar longitude
-SCE_h					Heliocentric ecliptic coordinates relative to solar longitude
-a		        	Semi-major axis (AU)
-e							Eccentricity
-i							Inclination
-peri					Argument of perihelion
-pi	        	Longitude of perihelion
-q		        	Perihelion distance (AU)
-QQ						Aphelion distance (AU)
-Tj        		Tisserand's parameter with respect to Jupiter
+v_init - Initial speed (trajectory start point)
+v_g - Geocentric velocity (m/s)
+v_h - Helioventric velocity of the meteor (m/s)
+rend_ele - End height
+peak_magn - Peak magnitude
+duration - Visible trajectory duration (s)
+ra_g, dec_g - Geocentric coordinates
+L_g, B_g - Geocentric ecliptic coordinates
+L_h, B_h - Heliocentric ecliptic coordinates
+SCE_g - Geocentric ecliptic coordinates relative to solar longitude
+SCE_h - Heliocentric ecliptic coordinates relative to solar longitude
+a - Semi-major axis (AU)
+e - Eccentricity
+i - Inclination
+peri - Argument of perihelion
+pi - Longitude of perihelion
+q - Perihelion distance (AU)
+QQ - Aphelion distance (AU)
+Tj - Tisserand's parameter with respect to Jupiter
 
 Bug reports and smart ideas are welcome.
 
