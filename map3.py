@@ -535,9 +535,6 @@ def update_map_soft(event):
     t_count.value = str(meteors.shape[0])
 
 
-
-
-
 # reload last 2 days
 @param.depends(quick_download.param.value, watch=True)
 def update_map_pane_period(dayss):
@@ -557,7 +554,7 @@ def update_map_pane_period(dayss):
         print("No new records found")
         status.value = "No new records found"
 
-
+'''
 @pn.depends(dv.param.value)
 def time_hvplot(dvf):
     dvf = dvf.loc[:, ['day', 'shower_code', 'traj_id']].groupby(['day', 'shower_code'],
@@ -603,7 +600,7 @@ def time_hvplot(dvf):
             )
 
     return plot
-
+'''
 
 # MAIN PART
 #############################################################################
