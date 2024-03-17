@@ -8,12 +8,13 @@ https://globalmeteornetwork.org
 https://globalmeteornetwork.org/data/traj_summary_data/daily/
 
 To clone the repository, use:
-'git clone --recurse-submodules https://github.com/satmonkey/GMN_meteormap'
+
+`git clone --recurse-submodules https://github.com/satmonkey/GMN_meteormap`
 
 To run the code, install the modules as mentioned in the requirements.txt
 Then, you can run the app e.g.:
 
-'panel serve map3.py --static-dirs assets=assets --address 0.0.0.0 --port 8080 --allow-websocket-origin="*" --reuse-sessions --log-level debug'
+`panel serve map3.py --static-dirs assets=assets --address 0.0.0.0 --port 8080 --allow-websocket-origin="*" --reuse-sessions --log-level debug`
 
 Then, point your browser to: http://localhost:8080
 
