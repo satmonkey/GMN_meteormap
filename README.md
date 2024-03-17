@@ -10,6 +10,8 @@ https://globalmeteornetwork.org/data/traj_summary_data/daily/
 To run the code, install the modules as mentioned in the requirements.txt
 Then, you can run the app e.g.:
 
-panel serve map3.py --static-dirs assets=/srv/app/assets --address 0.0.0.0 --port 8080 --allow-websocket-origin="*" --reuse-sessions --log-level debug
+panel serve map3.py --static-dirs assets=assets --address 0.0.0.0 --port 8080 --allow-websocket-origin="*" --reuse-sessions --log-level debug
+
+Then, point your browser to: http://localhost:8080
 
 This code contains a small sample database, enabling the code to run in a minimized way
