@@ -224,7 +224,7 @@ def add_meteors(map, m):
 def fill_select(widget=None, options=[]):
     widget.options = options
 
-
+'''
 def celestial(orbit_list=[], file_suffix=''):
     output_dir = 'data'
     figs = []
@@ -259,12 +259,11 @@ def celestial_png(filenames=[]):
         i = i + 1
     return figs
 
+'''
 
 def w_update(x_range, y_range):
     print(x_range, y_range)
-    # with param.parameterized.discard_events(self):
     rp.xr, rp.yr = x_range, y_range
-    # self.yr = y_range
 
 
 ###################################################
@@ -278,16 +277,10 @@ map_scale1 = (0, 360)
 map_scale2 = (-180, 180)
 map_scale3 = (-270, 90)
 
-#c_map = colorcet.rainbow
-
 meteors_pd = pd.DataFrame(columns = list(dbtools.orbit_dtypes.keys()))
-#meteors_pd.columns = list(dbtools.orbit_dtypes.keys())
 
 dt1 = pn.widgets.DatetimePicker(name='From', value=datetime.now() - timedelta(days=3),  sizing_mode='fixed', width=160)
 dt2 = pn.widgets.DatetimePicker(name='To', value=datetime.now(),  sizing_mode='fixed', width=160)
-
-#refresh_days = pn.widgets.Button(name='🔃', button_type='primary', sizing_mode='fixed', width=24)#, css_classes=['bk-root.bk-btn'])
-# tooltip='Update data from GMN server',
 
 filt = pn.widgets.TextInput(name='Station filter', placeholder="Enter e.g. CZ,DE", value='', sizing_mode='fixed', width=200)
 iau = pn.widgets.TextInput(name='Shower & radiant filter', placeholder='Enter e.g. ORI,PER', value='', sizing_mode='fixed', width=200)
@@ -321,8 +314,6 @@ meteors_pd['SCE_h'] = meteors_pd['L_h'] - meteors_pd['la_sun']
 meteors_pd['SCE_g'] = (- meteors_pd['SCE_g']) + (360 * meteors_pd['SCE_g'] < 0)
 meteors_pd['SCE_h'] = (- meteors_pd['SCE_h']) + (360 * meteors_pd['SCE_h'] < 0)
 meteors_pd['shower_code'] = meteors_pd['shower_code'].astype('category')
-#geometry = [Point(xy) for xy in zip(meteors_pd['SCE_h'], meteors_pd['L_h'])]
-#meteors_gpd = gpd.GeoDataFrame(meteors_pd, geometry=geometry)
 
 
 dv = pn.widgets.Tabulator(meteors_pd, sizing_mode='stretch_both', max_height=800, max_width=1900, page_size=100,
@@ -336,19 +327,16 @@ c = pn.widgets.Select(name='z', value='shower_code', options=['v_g', 'v_h', 'pea
 kind = pn.widgets.Select(name='kind', value='points', options=['points','scatter'])
 rasterize = pn.widgets.Checkbox(name='rasterize', sizing_mode='fixed', width=10, value=False)
 proj = pn.widgets.Select(name='projection', value='Sinusoidal', options=['Sinusoidal','PlateCarree'])
-# not visible
-#x1 = pn.widgets.Select(name='x1', value=0, options=['0', '-180', '-270'])
-#x2 = pn.widgets.Select(name='x2', value=360, options=['0', '180', '90'])
 
 # time pplot
-x_t = pn.widgets.Select(name='x', value='day', options=['day'])
-y_t = pn.widgets.Select(name='y', value='traj_id', options=['traj_id'])
-c_t = pn.widgets.Select(name='z', value='shower_code', options=['v_g','peak_mag','e','duration','rend_ele','shower_code'])
-kind_t = pn.widgets.Select(name='kind', value='bar', options=['bar', 'area'])
-by_t = pn.widgets.Select(name='by', value='shower_code', options=['shower_code', None])
-showers_t = pn.widgets.MultiSelect(value=[''], options=['',])
-formatter_t = DatetimeTickFormatter(months='%b %Y', days='%m/%d')
-formatter_m = MercatorTickFormatter(dimension='lon')
+#x_t = pn.widgets.Select(name='x', value='day', options=['day'])
+#y_t = pn.widgets.Select(name='y', value='traj_id', options=['traj_id'])
+#c_t = pn.widgets.Select(name='z', value='shower_code', options=['v_g','peak_mag','e','duration','rend_ele','shower_code'])
+#kind_t = pn.widgets.Select(name='kind', value='bar', options=['bar', 'area'])
+#by_t = pn.widgets.Select(name='by', value='shower_code', options=['shower_code', None])
+#showers_t = pn.widgets.MultiSelect(value=[''], options=['',])
+#formatter_t = DatetimeTickFormatter(months='%b %Y', days='%m/%d')
+#formatter_m = MercatorTickFormatter(dimension='lon')
 
 txt = ''
 with open('help1.txt') as f:
@@ -369,14 +357,11 @@ help2.value = txt
 color = pn.widgets.ColorPicker(value='#ff0000')
 hvplot.extension('matplotlib', 'plotly', 'bokeh', compatibility='bokeh')
 hvplot.output(backend='bokeh')
-#addgv.output(backend='bokeh')
 
 latlon = [0, 0]
 autozoom.value = True
 fov.value = False
 
-#xrange = (0, 360)
-#yrange = (-90, 90)
 
 # create the hvplot object
 rp = RadiantPlot(name='', df=dv.value)
@@ -482,22 +467,6 @@ def update_map_pane(event):
 
     status.value = 'Ground plot updated'
 
-    # Updating the celestial plots
-    #######################################
-    '''
-    config.print_time("Going to generate figures...")
-    if len(orbits) > -1:
-        figs = celestial(orbits, file_suffix=file_suffix)
-        mpl_pane2.object = figs[0]
-        mpl_pane3.object = figs[1]
-        mpl_pane4.object = figs[2]
-    else:
-        mpl_pane2.object = None
-        mpl_pane3.object = None
-        mpl_pane4.object = None
-    config.print_time("All 3 figures updated...")
-    status.value = 'Density map updated'
-    '''
 
     # Update HVPLOT dataframe
     #################################################
@@ -558,53 +527,6 @@ def update_map_pane_period(dayss):
         print("No new records found")
         status.value = "No new records found"
 
-'''
-@pn.depends(dv.param.value)
-def time_hvplot(dvf):
-    dvf = dvf.loc[:, ['day', 'shower_code', 'traj_id']].groupby(['day', 'shower_code'],
-        as_index=False,
-        dropna=False)\
-        .count()
-
-    dvf.rename(columns={'traj_id':'count'}, inplace=True)
-    #dvf.sort_values(by='count', ascending=False, inplace=True)
-    plot = dvf.hvplot(
-            # working!
-            #x='shower_code', y='traj_id', by='day',
-            x='day',
-            by='shower_code',
-            kind=kind_t,
-            #x=x_t, y='[', kind=kind_t,
-            #title=y_t.value + ' vs ' + x_t.value,
-            stacked=True,
-            alpha=0.4,
-            legend=True,
-            responsive=True,
-            size=20,
-            min_width=600,
-            min_height=700,
-            max_width=1900,
-            max_height=1000,
-            ylabel='count',
-            colorbar=True,
-            clabel=c_t,
-            #xticks=10,
-            #yticks=10,
-            #ylim=map_scale1[1],
-            grid=True,
-            #hover_cols=['traj_id','utc',"shower_code",'Stations'],
-            symmetric=False,
-            yformatter='%d',
-            xformatter='%d',
-            #groupby=y_t,
-            #data_aspect=1,
-            #fontscale=1.5,
-            #xlim=(0,360),
-            #ylim=(-90,90)
-            )
-
-    return plot
-'''
 
 # MAIN PART
 #############################################################################
@@ -621,9 +543,6 @@ map = get_map(latlon)
 fs = fm.plugins.Fullscreen()
 map.add_child(fs)  # adding fullscreen button to map
 
-mpl_pane2 = pn.pane.Matplotlib(None, dpi=144, sizing_mode='stretch_both', margin=0, max_height=1000)
-mpl_pane3 = pn.pane.Matplotlib(None, dpi=144, sizing_mode='stretch_both', margin=0, max_height=1000)
-mpl_pane4 = pn.pane.Matplotlib(None, dpi=144, sizing_mode='stretch_both', margin=0, max_height=1000)
 
 # ONLY FOR THE HVPLOT
 ###########################################
@@ -681,21 +600,6 @@ view = pn.Row(
                     sizing_mode='stretch_both', max_height=700, max_width=1650
                 ),  
             ),
-            #(
-                #'Velocity',
-                #mpl_pane2,
-            #),
-            #(
-                #'Solar lon',
-                #mpl_pane3,
-            #),
-            #(
-            #    'Density',
-            #    pn.Column(
-            #        mpl_pane4,
-            #        #o_count,
-            #    ),
-            #),
             (
                 'Radiant plot',
                 pn.Column(
@@ -708,18 +612,6 @@ view = pn.Row(
                     sizing_mode='stretch_both', max_height=750, max_width=1650
                 ), 
             ),
-            #(
-            #    'Time plot',
-             #   pn.Column(
-             #       pn.Row(
-             #           #pn.WidgetBox(kind_t, sizing_mode='fixed', width=140, css_classes=['panel-widget-box']),
-             #           time_phvplot,
-             #           css_classes=['panel-widget-box'],
-             #           sizing_mode='scale_both'
-             #       ),
-             #       sizing_mode='stretch_both', max_height=900, max_width=1900
-             #   ),
-            #),
             (
                 'Data',
                 pn.Column(
