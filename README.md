@@ -1,8 +1,9 @@
 # GMN meteormap
-GMN Meteor Map is a multipurpose trajectory/orbit viewer, based on the data produced by Global Meteor Network trajectory solver.
+GMN Meteor Map is a multipurpose trajectory/orbit viewer:
+
 https://www.meteorview.net
 
-For more information, visit:
+based on the data produced by the Global Meteor Network trajectory solver. For more information, visit:
 
 https://globalmeteornetwork.org
 
