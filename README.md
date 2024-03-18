@@ -1,7 +1,9 @@
 # GMN meteormap
-GMN Meteor Map is a multipurpose trajectory/orbit viewer, based on the data produced by Global Meteor Network trajectory solver.
+GMN Meteor Map is a multipurpose trajectory/orbit viewer:
 
-For more information, visit:
+https://www.meteorview.net
+
+based on the data produced by the Global Meteor Network trajectory solver. For more information, visit:
 
 https://globalmeteornetwork.org
 
@@ -22,6 +24,6 @@ This code contains a small sample database, enabling the code to run in a minima
 
 TODO:
 
-* Groundplot - tooltip or popup (on click), showing the list of FOVs for that location
+* Groundplot - tooltip or popup (after click on the map), showing the list of stations covering that location
 * Groundplot - same as above, highlight the FOVs
 
