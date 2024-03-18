@@ -22,6 +22,6 @@ This code contains a small sample database, enabling the code to run in a minima
 
 TODO:
 
-* Groundplot - tooltip or popup (on click), showing the list of FOVs for that location
+* Groundplot - tooltip or popup (after click on the map), showing the list of stations covering that location
 * Groundplot - same as above, highlight the FOVs
 
