@@ -20,7 +20,7 @@ class RadiantPlot(param.Parameterized):
                         'rend_ele', 'shower_code', 'a', 'q', 'QQ'])
     kind = 'points'
     #kind = param.Selector(default='points', objects=['scatter', 'points'], precedence=-1)
-    proj = param.Selector(default='PlateCarree', objects=['PlateCarree', 'Sinusoidal'])
+    proj = param.Selector(default='Sinusoidal', objects=['PlateCarree', 'Sinusoidal'])
     title = 'Radiant plot in ecliptic coordinates, Platecarree projection'
     rasterize = param.Boolean(default=False)
     #x1 = param.Number(default=0)
@@ -48,16 +48,21 @@ class RadiantPlot(param.Parameterized):
         #self.yr = self.rangexy.y_range
         #self.xr = (0,0)
         #self.yr = (0,0)
-        self.hvplot_settings = {
-            'grid': True,
-            #'geo': True,
-            #'global_extent': True,              
-        }
-        self.proj1 = crs.PlateCarree(central_longitude=270)
+
+        self.proj1 = crs.PlateCarree()
         self.proj2 = crs.Sinusoidal(central_longitude=270)
         self.c_map = cc.glasbey_light
         self.aggregator = ds.count_cat(self.c)
         self.title = 'Radiant plot in ecliptic coordinates, Platecarree projection'
+        self.hvplot_settings = {
+            #'grid': True,
+            'crs': self.proj1,
+            'geo': True,
+            'projection': self.proj2,
+            'global_extent': True,
+            'cnorm': 'eq_hist',
+            'features': ['grid'],
+        }
 
 
     def __del__(self):
@@ -70,7 +75,7 @@ class RadiantPlot(param.Parameterized):
         y = self.y
         c = self.c
 
-        self.proj1 = crs.PlateCarree(central_longitude=270)
+        self.proj1 = crs.PlateCarree()
 
 
         '''
@@ -126,7 +131,7 @@ class RadiantPlot(param.Parameterized):
             plot = None
         return plot
 
-    # rasterize checkbox changed
+
     @param.depends('rasterize', watch=True)
     def update_shade(self):
         #self.c_map = cc.m_rainbow
@@ -151,7 +156,7 @@ class RadiantPlot(param.Parameterized):
                 }
         ...
 
-    # dimension for x-axis changed
+
     @param.depends('x', watch=True)
     def update_x(self):
         if self.x in ['SCE_h', 'SCE_g']:
@@ -169,7 +174,7 @@ class RadiantPlot(param.Parameterized):
             #xx1, xx2 = (0,360)
             #x_ticks = (0, 45, 90, 135, 180, 225, 270, 315, 360)
 
-    # dimension for z-axis changed
+
     @param.depends('c', watch=True)
     def update_c(self):
         if self.c == 'shower_code':
@@ -183,7 +188,7 @@ class RadiantPlot(param.Parameterized):
             #self.aggregator = ds.sum(self.c)
             self.c_map = cc.m_rainbow_r
 
-    # projection changed
+
     @param.depends('proj', watch=True)
     def update_proj(self):
 

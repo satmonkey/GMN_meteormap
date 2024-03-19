@@ -326,7 +326,7 @@ c = pn.widgets.Select(name='z', value='shower_code', options=['v_g', 'v_h', 'pea
                                         'rend_ele', 'shower_code', 'a', 'q', 'QQ'])
 kind = pn.widgets.Select(name='kind', value='points', options=['points','scatter'])
 rasterize = pn.widgets.Checkbox(name='rasterize', sizing_mode='fixed', width=10, value=False)
-proj = pn.widgets.Select(name='projection', value='Sinusoidal', options=['Sinusoidal','PlateCarree'])
+#proj = pn.widgets.Select(name='projection', value='Sinusoidal', options=['Sinusoidal','PlateCarree'])
 
 # time pplot
 #x_t = pn.widgets.Select(name='x', value='day', options=['day'])
