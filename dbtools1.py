@@ -545,14 +545,15 @@ def Load_last2_days(days):
     #print(data)
     #print("data:", len(data))
     #print("count:", days)
+    log = ''
     for d in data:
         f = os.path.basename(urlparse(d).path)
-        print("Downloading " + f + "...")
+        log +=  ("Downloading " + f + "...")
         #os.system('wget -q --no-cache ' + d)
         f = d
         n = n + Load_Data(f)
         #os.system('rm ' + f)
-    return n
+    return log
 
 
 

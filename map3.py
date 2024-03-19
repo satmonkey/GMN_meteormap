@@ -512,7 +512,7 @@ def update_map_soft(event):
 @param.depends(quick_download.param.value, watch=True)
 def update_map_pane_period(dayss):
     folium_pane.loading = True
-    dbtools.Load_last2_days(2)
+    print(dbtools.Load_last2_days(2))
     new_count = dbtools.traj_count()
     print("current count:", traj_counter.value)
     print("new count:", new_count)
