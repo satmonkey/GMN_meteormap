@@ -16,9 +16,6 @@ import pickle
 from fiona.drvsupport import supported_drivers
 from shapely.geometry import Point
 
-import warnings
-warnings.filterwarnings('ignore')
-
 db = "gmn03.db"  # Database filename
 table_base = "traj_sum"
 supported_drivers['LIBKML'] = 'rw'
@@ -548,15 +545,15 @@ def Load_last2_days(days):
     #print(data)
     #print("data:", len(data))
     #print("count:", days)
-    logtxt = ""
+    log = ''
     for d in data:
         f = os.path.basename(urlparse(d).path)
-        logtxt +=  ("Downloading " + f + "...")
+        log +=  ("Downloading " + f + "...")
         #os.system('wget -q --no-cache ' + d)
         f = d
         n = n + Load_Data(f)
         #os.system('rm ' + f)
-    return logtxt
+    return log
 
 
 
