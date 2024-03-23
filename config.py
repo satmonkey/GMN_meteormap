@@ -1,9 +1,12 @@
 t0 = 0
 DEBUG = True
-stations_pickle = '/srv/app/StationCoords/coords.pickle'
+stations_pickle = 'StationCoords/coords.pickle'
 from datetime import datetime
 
-def print_time(str=''):
+def print_time(*ll):
     if DEBUG:
-        #print("{:0.1f}".format(time.time() - t0), " s")
-        print(datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3], str)
+        txt = ''
+        for l in ll:
+            txt += str(l)
+            #print("{:0.1f}".format(time.time() - t0), " s")
+        print(datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3], txt)
