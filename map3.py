@@ -262,7 +262,7 @@ def celestial_png(filenames=[]):
 '''
 
 def w_update(x_range, y_range):
-    print(x_range, y_range)
+    config.print_time(x_range, y_range)
     rp.xr, rp.yr = x_range, y_range
 
 
@@ -376,7 +376,7 @@ def update_map_pane(event):
         ...
     config.t0 = time.time()
     meteors = []
-    print("Updating...", filt.value_input, iau.value_input)
+    config.print_time("Updating...", filt.value_input, iau.value_input)
     status.value = 'Updating data'
     file_suffix = '_' + "dummy"
 
@@ -393,7 +393,7 @@ def update_map_pane(event):
 
     # detect famous hacking technique and refuse the filter if needed
     if max(len(i) > 6 for i in filt_list) or max(len(j) > 3 for j in iau_list):
-        print("SQL inject detected... filter denied")
+        config.print_time("SQL inject detected... filter denied")
         filt.value = update_param[0]
         iau.value = update_param[2]
         return
@@ -405,7 +405,7 @@ def update_map_pane(event):
     # update last record time
     time_last.value = dbtools.FetchLastTime()
     try:
-        print(time_last.value[0][0][:-7])
+        #config.print_time(time_last.value[0][0][:-7])
         time_last.value = time_last.value[0][0][:-7]
     except:
         time_last.value = "No time set yet"
@@ -414,8 +414,8 @@ def update_map_pane(event):
     # fetch list of ID's based on filter
     id_list = dbtools.Fetch_IDs(dt1.value, dt2.value, filt_list, iau_list, rp.x, rp.y, zoom_box)
 
-    print(len(id_list))
-    print("Fetching meteors...")
+    #config.print_time(len(id_list))
+    config.print_time("Fetching meteors...")
     meteors = dbtools.Fetch_Meteors(id_list)
     meteors = meteors[:100000]
     t_count.value = str(meteors.shape[0])
@@ -423,7 +423,7 @@ def update_map_pane(event):
     # Updating the Folium meteor map
     #######################################
     # draw meteors to the basemap
-    print(t_count.value, " meteors")
+    config.print_time(t_count.value, " meteors")
     config.print_time("Drawing meteors...")
     met_count = add_meteors(map, meteors)
 
@@ -436,7 +436,7 @@ def update_map_pane(event):
         m_count.value = '> 1500'
 
     # STATION LOCATIONS
-    print("Adding station locations...")
+    config.print_time("Adding station locations...")
     coord_cm = add_coords(map, filt_list)
     #if coord_cm.data.shape[0] > 0:
     if coord_cm != 0:
@@ -470,7 +470,7 @@ def update_map_pane(event):
 
     # Update HVPLOT dataframe
     #################################################
-    print("Updating hvplot dataframe...")
+    config.print_time("Updating hvplot dataframe...")
     meteors_pd = pd.DataFrame(meteors.iloc[:, :-1])
     #meteors_pd = pd.DataFrame(meteors)
     meteors_pd['utc'] = pd.to_datetime(meteors_pd['utc'])
@@ -481,12 +481,12 @@ def update_map_pane(event):
     #    meteors_pd = meteors_pd.sample(5000, replace=True)
     #    t_count.value = "> 5000"
 
-    print("Updating meteor PD object...")
-    print(meteors_pd)
+    config.print_time("Updating meteor PD object...")
+    #config.print_time(meteors_pd)
     dv.value = meteors_pd
 
     # update the RPLOT by a new data
-    print("Updating radiant plot...")
+    #config.print_time("Updating radiant plot...")
     rp.df = meteors_pd
     try:
         view.loading = False
@@ -501,8 +501,8 @@ def update_map_pane(event):
 def update_map_soft(event):
     ...
     id_list = dbtools.Fetch_IDs(dt1.value, dt2.value, filt_list, iau_list, rp.x, rp.y, zoom_box)
-    print(len(id_list))
-    print("Fetching meteors...")
+    config.print_time(len(id_list))
+    config.print_time("Fetching meteors...")
     meteors = dbtools.Fetch_Meteors(id_list)
     meteors = meteors[:100000]
     t_count.value = str(meteors.shape[0])
@@ -512,19 +512,20 @@ def update_map_soft(event):
 @param.depends(quick_download.param.value, watch=True)
 def update_map_pane_period(dayss):
     folium_pane.loading = True
-    print(dbtools.Load_last2_days(2))
+    config.print_time("Manual data refresh triggered...")
+    dbtools.Load_last2_days(2)
     new_count = dbtools.traj_count()
-    print("current count:", traj_counter.value)
-    print("new count:", new_count)
+    config.print_time("current count:", traj_counter.value)
+    config.print_time("new count:", new_count)
     new = new_count - traj_counter.value
     #status.value = str(new) + " new records found"
     folium_pane.loading = False
     if int(new) > 0:
-        print(str(new) + " new records found, updating plot...")
+        config.print_time(str(new) + " new records found, updating plot...")
         update_map_pane('click')
         status.value = str(new) + " new records found"
     else:
-        print("No new records found")
+        config.print_time("No new records found")
         status.value = "No new records found"
 
 

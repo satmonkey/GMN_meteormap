@@ -199,9 +199,9 @@ def Load_Data(file_path):
     table = table_base
 
     # load data
-    print("Loading " + file_path + "...")
+    config.print_time("Loading " + file_path + "...")
     df = pd.read_csv(file_path, delimiter=';', skiprows=4, header=None, skipinitialspace=True)
-    print("Loading complete...")
+    config.print_time("Loading complete...")
     df = df.T
     df = df.iloc[list(orbit_fields.keys())].T
     df.columns = orbit_fields.values()
@@ -221,7 +221,7 @@ def Load_Data(file_path):
     df['geometry'] = df['geometry'].apply(wkt.loads)
 
 
-    #print("flushing data to " + name)
+    #config.print_time("flushing data to " + name)
     gdf = gpd.GeoDataFrame(df, geometry='geometry')
 
     gdf['geometry'] = gdf.apply(lambda x: shapely.wkb.dumps(x.geometry), axis=1)
@@ -254,7 +254,7 @@ def Load_Data(file_path):
                 "insert or ignore into trajs (traj, station) select distinct traj_id, firstone from x UNION ALL select traj_id, rest from x where rest not like '%,%' and traj_id " \
               "not in (select traj from trajs) ORDER by traj_id"
 
-        #print(sql)
+        #config.print_time(sql)
         c.execute(sql)
         conn.commit()
         c.close()
@@ -264,7 +264,7 @@ def Load_Data(file_path):
     #if gdf.shape[0] > 0:
     #    gdf.to_sql(table, conn, if_exists='append', index=False, dtype=orbit_dtypes)
     #    Orbits.Create_Orbit_List(gdf)
-    #print(str(gdf.shape[0]) + " records added...")
+    #config.print_time(str(gdf.shape[0]) + " records added...")
     new_count = traj_count()
 
     return new_count
@@ -288,7 +288,7 @@ def Load_KMLs(url):
     for s in list(result):
         f = os.path.basename(urlparse(s).path)
         os.system('wget -q --no-cache ' + s + ' -O kml/' + f)
-        print("Downloading:", f)
+        config.print_time("Downloading:", f)
     #conn.close()
     return list(result)
 
@@ -324,7 +324,7 @@ def Fetch_IDs(t1, t2, filt_list, iau_list, x, y, zoom_box):
 
     # time filter
     sql = sql + "AND (datetime(utc) BETWEEN datetime('" + str(t1) + "') AND datetime('" + str(t2) + "'))"
-    #print(sql)
+    #config.print_time(sql)
     conn = Connect_DB(db)
     c = conn.cursor()
     c.execute(sql)
@@ -332,7 +332,7 @@ def Fetch_IDs(t1, t2, filt_list, iau_list, x, y, zoom_box):
     c.close()
     conn.close()
     # convert list of tuples to list
-    #print(data)
+    #config.print_time(data)
     data = [item for t in data for item in t]
     return data
 
@@ -354,7 +354,7 @@ def Fetch_IDs2(t1, t2, filt_list, iau_list, x, y, zoom_box):
 
     # time filter
     sql = sql + "AND (datetime(utc) BETWEEN datetime('" + str(t1) + "') AND datetime('" + str(t2) + "'))"
-    #print(sql)
+    #config.print_time(sql)
     conn = Connect_DB(db)
     c = conn.cursor()
     c.execute(sql)
@@ -362,7 +362,7 @@ def Fetch_IDs2(t1, t2, filt_list, iau_list, x, y, zoom_box):
     c.close()
     conn.close()
     # convert list of tuples to list
-    #print(data)
+    #config.print_time(data)
     data = [item for t in data for item in t]
     return data
 
@@ -386,7 +386,7 @@ def Fetch_Orbits(id_list):
                     o = (r[1])
                     orbits.append(o)
                 except:
-                    print("Reading orbit failed...")
+                    config.print_time("Reading orbit failed...")
                     break
         else: break
 
@@ -414,10 +414,10 @@ def Fetch_Data(t1, t2, filt_list, iau_list, x, y, zoom_box):
 
     # time filter
     sql = sql + "AND (datetime(utc) BETWEEN datetime('" + str(t1) + "') AND datetime('" + str(t2) + "')))"
-    print(sql)
+    config.print_time(sql)
     conn = Connect_DB(db)
 
-    print(sql)
+    config.print_time(sql)
     data = gpd.read_postgis(sql, conn, geom_col='geometry')
     conn.close()
     return data
@@ -437,13 +437,13 @@ def Fetch_Meteors(id_list):
         sql1 = sql1[:-1]
     sql1 = sql1 + ")"
     sql = sql + sql1
-    #print(sql)
+    #config.print_time(sql)
     t0 = datetime.datetime.now()
     conn = Connect_DB_ro(db)
     data = gpd.read_postgis(sql, conn, geom_col='geometry')
     conn.close()
-    print("The query took:", int((datetime.datetime.now() - t0).total_seconds()), "seconds")
-    #print(data)
+    #config.print_time("The query took: ", int((datetime.datetime.now() - t0).total_seconds()), " seconds")
+    #config.print_time(data)
     return data
 
  
@@ -477,11 +477,9 @@ def Load_period_url_list(period):
         url_list = [url_monthly + '/' + node.get('href') for node in soup.find_all('a') if node.get('href').endswith(ext)]
     elif period == 'all':
         page = requests.get(url_all).text
-        print(page)
+        config.print_time(page)
         soup = BeautifulSoup(page, 'html.parser')
         url_list = [url_all + '/' + node.get('href') for node in soup.find_all('a') if node.get('href').endswith(ext)]    
-    #soup = BeautifulSoup(page, 'html.parser')
-    #url_list = [url_daily + '/' + node.get('href') for node in soup.find_all('a') if node.get('href').endswith(ext)]
     return url_list
 
 
@@ -517,7 +515,7 @@ def Load_period(table_name, period):
     data = Load_period_url_list(period)
     url = list(filter(lambda u: p in u, data))[0]
     f = os.path.basename(urlparse(url).path)
-    print("Downloading", f)
+    config.print_time("Downloading", f)
     os.system('wget -q --no-cache ' + url)
     #conn = Connect_DB(db)
     Load_Data(f)
@@ -529,10 +527,10 @@ def Load_period(table_name, period):
 def Load_all_days():
     conn = Connect_DB(db)
     data = Load_period_url_list('all')
-    #print(data[0])
+    #config.print_time(data[0])
     for d in data:
         f = os.path.basename(urlparse(d).path)
-        print(f)
+        config.print_time(f)
         os.system('wget -q --no-cache ' + d)
         Load_Data(f)
         os.system('rm ' + f)
@@ -545,18 +543,14 @@ def Load_last2_days(days):
     n = 0
     # slice the file list, omit last 2 files
     data = data[-2-days:-2]
-    #print(data)
-    #print("data:", len(data))
-    #print("count:", days)
     logtxt = ""
     for d in data:
         f = os.path.basename(urlparse(d).path)
-        logtxt +=  ("Downloading " + f + "...")
+        config.print_time("Downloading " + f + "...")
         #os.system('wget -q --no-cache ' + d)
         f = d
         n = n + Load_Data(f)
         #os.system('rm ' + f)
-    return logtxt
 
 
 
@@ -593,26 +587,26 @@ def InsertOrbits(l):
     i = 0
     j = 0
     commit_c = 0
-    print("Inserting orbits", end="")
+    config.print_time("Inserting orbits", end="")
     for obj in l:
         try:
             cursor.execute(insert_string, (obj.orbit.traj_id, pickle.dumps(obj)))
             i = i + 1
             commit_c += 1
-            print(i, end='\r', flush=True)
+            config.print_time(i, end='\r', flush=True)
             if commit_c == 1000:
                 conn.commit()
                 commit_c = 0
-            #print(obj.orbit.traj_id + " - orbit saved")
+            #config.print_time(obj.orbit.traj_id + " - orbit saved")
         except sqlite3.IntegrityError:
-            #print("Duplicate key")
-            #print("-",end="")
+            #config.print_time("Duplicate key")
+            #config.print_time("-",end="")
             j = j + 1
     conn.commit()
     conn.close()
-    print()
-    print(str(i) + " orbits saved...")
-    print(str(j) + " orbits rejected...")
+    config.print_time()
+    config.print_time(str(i) + " orbits saved...")
+    config.print_time(str(j) + " orbits rejected...")
 
 
 
@@ -638,7 +632,7 @@ def LoadAllKMLFiles():
     files = glob.glob(os.path.join("kml/", "*.kml"))
     conn = Connect_DB(db)
     c = conn.cursor()
-    print("refreshing FOV table...")
+    config.print_time("refreshing FOV table...")
     # delete all rows
     sql = "delete from fov100"
     c.execute(sql)
@@ -658,11 +652,11 @@ def LoadAllKMLFiles():
             c.execute(sql, (kml_gdf['Name'][0], kml_gdf['geometry'][0].wkb))
             i += 1
         except:
-            #print("duplicate detected...")
+            #config.print_time("duplicate detected...")
             ...
     conn.commit()
     conn.close()
-    print("inserted " + str(i) + " FOV KML files")
+    config.print_time("inserted " + str(i) + " FOV KML files")
 
 
 # load station coordinates form the pickle file and inserts into table "stations"
@@ -675,13 +669,13 @@ def LoadStationCoords():
             try:
                 stations.append(pickle.load(openfile))
             except EOFError:
-                print("Error when loading pickle file...", f)
+                config.print_time("Error when loading pickle file...", f)
                 #conn.close()
                 break
 
 
     c = conn.cursor()
-    print("refreshing Stations table...")
+    config.print_time("refreshing Stations table...")
     # delete all rows
 
     try:
@@ -689,7 +683,7 @@ def LoadStationCoords():
         c.execute(sql)
         conn.commit()
     except:
-        print("Error during table cleanup")
+        config.print_time("Error during table cleanup")
         conn.close()
 
     sql = "insert into stations values (?,?)"
@@ -705,9 +699,9 @@ def LoadStationCoords():
             lat = float(stations[0][s]['lat'])
             lon = float(stations[0][s]['lon'])
         except:
-            print("problem with coords, omitting:", s, stations[0][s]['lat'], stations[0][s]['lon'])
-            #print(stations[0][s].values())
-            #print("")
+            config.print_time("problem with coords, omitting:", s, stations[0][s]['lat'], stations[0][s]['lon'])
+            #config.print_time(stations[0][s].values())
+            #config.print_time("")
             continue
 
         ids.append(s)
@@ -729,13 +723,13 @@ def LoadStationCoords():
             c.execute(sql, (coords_gdf['id'][i], coords_gdf['geometry'][i].wkb))
             i += 1
         except:
-            print("insert failed...")
+            config.print_time("insert failed...")
             conn.close()
             ...
 
     conn.commit()
     conn.close()
-    print("inserted " + str(i) + " station coords KML files")
+    config.print_time("inserted " + str(i) + " station coords KML files")
 
 
 def AddFOV(filt_list):
@@ -746,7 +740,7 @@ def AddFOV(filt_list):
     for filt in filt_list:
         sql = sql + filt + "%' OR station like '"
     sql = sql + "DEADBEEF'"
-    print(sql)
+    #config.print_time(sql)
     fov = gpd.read_postgis(sql, conn, geom_col='fov')
     conn.close()
     return fov
@@ -764,7 +758,7 @@ def AddCoords(filt_list):
     for filt in filt_list:
         sql = sql + filt + "%' OR id like '"
     sql = sql + "DEADBEEF'"
-    print(sql)
+    #config.print_time(sql)
     coords = gpd.read_postgis(sql, conn, geom_col='geometry')
     conn.close()
     return coords
@@ -783,7 +777,7 @@ def FetchLastTime():
 if __name__ == "__main__":
     t = time.time()
     stations_file_name = 'https://globalmeteornetwork.org/data/kml_fov/'
-    print('setting PROJ_LIB...')
+    config.print_time('setting PROJ_LIB...')
 
     # Converts np.array to TEXT when inserting
     #sqlite3.register_adapter(np.ndarray, adapt_array)
@@ -792,7 +786,7 @@ if __name__ == "__main__":
     #sqlite3.register_converter("array", convert_array)
 
     conn = Connect_DB(db)  # Create DB
-    #print(traj_count())
+    #config.print_time(traj_count())
 
     #months = Load_period_table_list('month')
     #for month in months:
@@ -806,5 +800,5 @@ if __name__ == "__main__":
 
     #Load_all_days()
     #MergeMonthsToYear_by_append('2021')
-    #print(data[0])
+    #config.print_time(data[0])
     conn.close()

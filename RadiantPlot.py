@@ -1,4 +1,5 @@
 # importsf
+import config
 import hvplot.pandas
 import pandas as pd
 import param
@@ -35,10 +36,10 @@ class RadiantPlot(param.Parameterized):
     aggregator = None
     #rangexy = RangeXY(source=plot)
 
-    print("Object started...")
+    config.print_time("Object started...")
 
     def __init__(self, **params):
-        print("Creating RadiantPlot object...")
+        config.print_time("Creating RadiantPlot object...")
         super(RadiantPlot, self).__init__(**params)
         self.plot = self.get_plot()
         #self.rangexy = RangeXY(source=self.plot)
@@ -66,11 +67,11 @@ class RadiantPlot(param.Parameterized):
 
 
     def __del__(self):
-        print('Destructor called...')
+        config.print_time('Destructor called...')
 
 
     def hv_plot(self):
-        print("Updating radiant plot...")
+        config.print_time("Updating radiant plot...")
         x = self.x
         y = self.y
         c = self.c
@@ -92,8 +93,8 @@ class RadiantPlot(param.Parameterized):
         '''
 
         #xx1, xx2 = (-270, 90)
-        x_ticks = [(-270, '90'), (-225, '135'), (-180, '180'), (-135, '225'), (-90, '270'), (-45, '315'), (0, '0'),
-                   (45, '45'), (90, '90')]
+        x_ticks = [(-270, '90'), (-225, '135'), (-180, '180'), (-135, '225'), (-90, '270'), (-45, '315'), (0, '0'), (45, '45'), (90, '90')]
+        #x_ticks = 
 
         pars = dict(
             x=x, y=y, c=c, kind=self.kind,
@@ -121,13 +122,13 @@ class RadiantPlot(param.Parameterized):
         #rangexy = RangeXY(source=self.plot, x_range=self.xr, y_range=self.yr)
         #self.plot = self.plot.redim.range(x=self.xr, y=self.yr)
         #self.rangexy.clear()
-        print("Updating HV plot...")
-        #print("peak_mag:", self.df['peak_mag'], (self.df['peak_mag']*(-5))+1)
-        #print('pars=', pars)
+        #config.print_time("Updating HV plot...")
+        #config.print_time("peak_mag:", self.df['peak_mag'], (self.df['peak_mag']*(-5))+1)
+        #config.print_time('pars=', pars)
         try:
             plot = self.get_hvplot(self.df, **pars)
         except:
-            print("Error during radiant plot update")
+            config.print_time("Error during radiant plot update")
             plot = None
         return plot
 
@@ -161,8 +162,8 @@ class RadiantPlot(param.Parameterized):
     def update_x(self):
         if self.x in ['SCE_h', 'SCE_g']:
             #xx1, xx2 = (-270, 90)
-            x_ticks = [(-270, '90'), (-225, '135'), (-180, '180'), (-135, '225'), (-90, '270'), (-45, '315'), (0, '0'),
-                (45, '45'), (90, '90')]
+            #x_ticks = [(-270, '90'), (-225, '135'), (-180, '180'), (-135, '225'), (-90, '270'), (-45, '315'), (0, '0'),
+            #    (45, '45'), (90, '90')]
             ...
 
             if self.x == 'SCE_h':
@@ -216,6 +217,7 @@ class RadiantPlot(param.Parameterized):
                 self.hvplot_settings = {
                     #'c': self.c,
                     'grid': True,
+                    #'global_extent': True,
                     #'projection': self.proj2,
                     #'rasterize': self.rasterize,
                     #'geo': True,
@@ -240,8 +242,8 @@ class RadiantPlot(param.Parameterized):
 
     def get_hvplot(self, df, **pars):
         #self.rangexy.clear()
-        print("Updating hvplot")
-        #print(df)
+        #config.print_time("Updating hvplot")
+        #config.print_time(df)
         #pars['title'] = self.title
         self.plot = df.hvplot(title=self.title, **pars)
         #plot.redim.range(x=(self.x1, self.x2), y=(self.y1, self.y2))
