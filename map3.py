@@ -1,7 +1,7 @@
-import os
+#import os
 import panel as pn
 import folium as fm
-from folium.plugins import BeautifyIcon
+#from folium.plugins import BeautifyIcon
 from folium.plugins import Search
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -15,9 +15,9 @@ from fiona.drvsupport import supported_drivers
 import hvplot.pandas
 from datetime import datetime, date, timedelta
 from bokeh.models.formatters import DatetimeTickFormatter, MercatorTickFormatter
-import numpy as np
+#import numpy as np
 import random
-import branca
+#import branca
 import branca.colormap as cmp
 
 import config as config
@@ -28,7 +28,7 @@ settings.resources = 'inline'
 
 #os.environ['PROJ_LIB'] = r'd:\ProgramData\Anaconda3\envs\panel\Library\share\basemap>'
 #os.environ['PROJ_LIB'] = r'd:\OSGeo4W\share\proj'
-global plt
+#global plt
 
 pn.extension('tabulator')
 pn.extension(loading_spinner='dots', loading_color='#00aa41', sizing_mode="stretch_both")
@@ -173,20 +173,6 @@ def add_meteors(map, m):
                                 'fillColor': clinear(x['properties']['peak_mag']),
                                 'fillOpacity': 0.75}
 
-    """ 
-    defining parameters for our markers and the popups when clicking on single markers
-    callback = ('function (row) {'
-                'var marker = L.circleMarker(new L.LatLng(row[0], row[1]));marker.setRadius(3);'
-                "var popup = L.popup({maxWidth: '300'});"
-                "const display_text = {text: '<b>Name: </b>' + row[2] + '</br>' + '<b> Age at TD: </b>' + row[3]};"
-                "var mytext = $(`<div id='mytext' class='display_text' style='width: 100.0%; height: 100.0%;'> ${display_text.text}</div>`)[0];"
-                "popup.setContent(mytext);"
-                "marker.bindPopup(popup);"
-                'return marker};')
-    """
-
-
-
     # Exclusion popup list, those fields will not be shown as popup
     drop_list = ['geometry', 'fov_end', 'fov_beg', 'mfe', 'Qc', 'f_param', 'peak_ht', 'rend_lon', \
                  'rend_lat', 'rbeg_lon', 'rbeg_lat', 'v_avg', 'elevation_apparent_norot', \
@@ -224,42 +210,6 @@ def add_meteors(map, m):
 def fill_select(widget=None, options=[]):
     widget.options = options
 
-'''
-def celestial(orbit_list=[], file_suffix=''):
-    output_dir = 'data'
-    figs = []
-
-    if len(orbit_list) > -1:
-        if len(orbit_list) > 1000:
-            orbit_list = orbit_list[:1000]
-        #orbit_list = Orbits.Create_Orbit_List(meteors)
-        figs = ap.generateTrajectoryPlots(output_dir, orbit_list, plot_name='scecliptic', plot_vg=False, plot_sol=False, \
-                                          plot_density=True, low_density=True, plot_showers=True,
-                                          time_limited_plot=True, file_suffix=file_suffix)
-
-    return figs
-
-
-def figure_png(filename=''):
-    plt.figure(figsize=(16, 9))
-    im = plt.imread(filename)
-    plt.imshow(im)
-    plt.tight_layout(pad=0, w_pad=0, h_pad=0)
-    plt.axis('off')
-    fig = plt.gcf()
-
-    return fig
-
-
-def celestial_png(filenames=[]):
-    i = 0
-    figs = []
-    for f in filenames:
-        figs.append(figure_png(f))
-        i = i + 1
-    return figs
-
-'''
 
 def w_update(x_range, y_range):
     config.print_time(x_range, y_range)
@@ -370,10 +320,9 @@ rp = RadiantPlot(name='', df=dv.value)
 
 
 def update_map_pane(event):
-    try:
-        view.loading = True
-    except:
-        ...
+
+    view.loading = True
+
     config.t0 = time.time()
     meteors = []
     config.print_time("Updating...", filt.value_input, iau.value_input)
@@ -488,10 +437,9 @@ def update_map_pane(event):
     # update the RPLOT by a new data
     #config.print_time("Updating radiant plot...")
     rp.df = meteors_pd
-    try:
-        view.loading = False
-    except:
-        ...
+
+    view.loading = False
+
     config.print_time("Update finished...")
 
     status.value = 'Plots updated'

@@ -138,8 +138,7 @@ class RadiantPlot(param.Parameterized):
         #self.c_map = cc.m_rainbow
         if self.rasterize:
             if self.proj == 'Sinusoidal':
-                # does not work yet
-                ...
+                self.hvplot_settings['project'] = True
                 #self.rasterize = False
             else:
                 self.hvplot_settings = {
