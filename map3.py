@@ -2,6 +2,7 @@
 import panel as pn
 import folium as fm
 #from folium.plugins import BeautifyIcon
+from folium.plugins import MousePosition
 from folium.plugins import Search
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -102,8 +103,10 @@ def style_fn_fov(x):
 # gets the fresh Folium map
 def get_map(latlon=[45, 20], zoom_start=3):
     (lat, lon) = latlon
-    return fm.Map(location=[lat, lon], width='100%', height='100%', zoom_start=3, prefer_canvas=True,
+    m = fm.Map(location=[lat, lon], width='100%', height='100%', zoom_start=3, prefer_canvas=True,
                   tiles='cartodbdark_matter', zoom_control=False,)
+    MousePosition().add_to(m)
+    return m
 
 
 # Adds KML vectors as FOV for station within the filter
@@ -424,6 +427,7 @@ def update_map_pane(event):
     #meteors_pd = pd.DataFrame(meteors)
     meteors_pd['utc'] = pd.to_datetime(meteors_pd['utc'])
     meteors_pd['day'] = meteors_pd['utc'].dt.dayofyear
+    #meteors_pd['shower_code'] = meteors_pd['shower_code'].astype('category')
 
     # limit HVPLOT to 5 000 points
     #if len(meteors_pd) > 5000:
