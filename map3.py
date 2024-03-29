@@ -20,11 +20,18 @@ from bokeh.models.formatters import DatetimeTickFormatter, MercatorTickFormatter
 import random
 #import branca
 import branca.colormap as cmp
+from branca.element import MacroElement
+from jinja2 import Template
 
 import config as config
 from RadiantPlot import RadiantPlot
 
 from bokeh.settings import settings
+import clipboard
+
+#js_files = {'pip': '/static/wise-leaflet-pip.js'}
+
+
 settings.resources = 'inline'
 
 #os.environ['PROJ_LIB'] = r'd:\ProgramData\Anaconda3\envs\panel\Library\share\basemap>'
@@ -34,7 +41,10 @@ settings.resources = 'inline'
 pn.extension('tabulator')
 pn.extension(loading_spinner='dots', loading_color='#00aa41', sizing_mode="stretch_both")
 pn.extension()
-#pn.config.defer_load = True
+#pn.extension(js_files=js_files)
+
+
+pn.config.defer_load = True
 pn.config.console_output = 'replace'
 
 
@@ -78,6 +88,47 @@ meteor_count = 0
 update_param = ('', False, '')
 
 
+class LatLngPopup1(MacroElement):
+    """
+    When one clicks on a Map that contains a LatLngPopup,
+    a popup is shown that displays the latitude and longitude of the pointer.
+
+    """
+    _template = Template(u"""
+            {% macro script(this, kwargs) %}
+                var {{this.get_name()}} = L.popup({maxWidth:500});
+                function latLngPop(e) {
+                    stations = ''
+                    i = 0;
+                    fovfg_008.getLayers()[0].eachLayer(
+                        function(layer) { 
+                            if (layer.contains(e.latlng) ) {
+                                //alert(layer.feature.properties.station);
+                                stations = stations + layer.feature.properties.station + ', ';
+                                i = i + 1;
+                            }
+                        }
+                    );
+                    if (stations.length > 0) { 
+                         stations = stations.slice(0,stations.length-2);
+                         txt = "Covered by: " + i + " stations:";
+                    } else {
+                         txt = "No coverage";
+                    }
+                    //data = e.latlng.lat.toFixed(4) + "," + lat + e.latlng.lng.toFixed(4);
+                    {{this.get_name()}}
+                        .setLatLng(e.latlng)
+                        .setContent(txt + "<br>" + stations)
+                        .openOn({{this._parent.get_name()}})
+                    }
+                {{this._parent.get_name()}}.on('click', latLngPop);
+
+            {% endmacro %}
+            """)  # noqa
+
+    def __init__(self):
+        super(LatLngPopup1, self).__init__()
+        self._name = 'LatLngPopup'
 
 
 # Create some nice style
@@ -100,12 +151,17 @@ def style_fn_fov(x):
     return {"color": "#" + "%02x%02x%02x" % (r, g, b), "weight": 1, "opacity": 0.5, "fillOpacity": 0.1}
 
 
-# gets the fresh Folium map
+# get the fresh Folium map
 def get_map(latlon=[45, 20], zoom_start=3):
     (lat, lon) = latlon
     m = fm.Map(location=[lat, lon], width='100%', height='100%', zoom_start=3, prefer_canvas=True,
                   tiles='cartodbdark_matter', zoom_control=False,)
-    MousePosition().add_to(m)
+    m._name = "groundplot"
+    m._id = "007"
+    llp = LatLngPopup1()
+    m.add_child(llp)
+    #pn.extension(js_files={'pip': "https://cdn.rawgit.com/hayeswise/Leaflet.PointInPolygon/v1.0.0/wise-leaflet-pip.js" })
+    m.get_root().html.add_child(fm.JavascriptLink('https://cdn.rawgit.com/hayeswise/Leaflet.PointInPolygon/v1.0.0/wise-leaflet-pip.js'))
     return m
 
 
@@ -122,6 +178,10 @@ def add_kml(map, filt_list):
         tooltip=fm.GeoJsonTooltip(['station'], labels=False),
         style_function=style_fn_fov,
     )
+    #kml_j._id = 'fovj'
+    #kml_j._name = '007'
+    kml_fg._name = 'fovfg'
+    kml_fg._id = '008'
     kml_fg.add_child(kml_j)
     return kml_fg
 
@@ -172,9 +232,9 @@ def add_meteors(map, m):
     meteor_dict = m.set_index('traj_id')['peak_mag']
 
     style_function = lambda x: {'weight': 4,
-                                'color': clinear(x['properties']['peak_mag']),
-                                'fillColor': clinear(x['properties']['peak_mag']),
-                                'fillOpacity': 0.75}
+        'color': clinear(x['properties']['peak_mag']),
+        'fillColor': clinear(x['properties']['peak_mag']),
+        'fillOpacity': 0.75}
 
     # Exclusion popup list, those fields will not be shown as popup
     drop_list = ['geometry', 'fov_end', 'fov_beg', 'mfe', 'Qc', 'f_param', 'peak_ht', 'rend_lon', \
