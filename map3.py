@@ -160,8 +160,8 @@ def get_map(latlon=[45, 20], zoom_start=3):
     m._id = "007"
     llp = LatLngPopup1()
     m.add_child(llp)
-    #pn.extension(js_files={'pip': "https://cdn.rawgit.com/hayeswise/Leaflet.PointInPolygon/v1.0.0/wise-leaflet-pip.js" })
     m.get_root().html.add_child(fm.JavascriptLink('https://cdn.rawgit.com/hayeswise/Leaflet.PointInPolygon/v1.0.0/wise-leaflet-pip.js'))
+    MousePosition(position='bottomleft').add_to(m)
     return m
 
 
@@ -306,9 +306,9 @@ update = pn.widgets.Button(name='Update', button_type='primary', margin=5, sizin
 quick_download = pn.widgets.Button(name='Quick download', button_type='primary', margin=5, sizing_mode='fixed', width=70)
 
 
-m_count = pn.widgets.StaticText(name='Meteors drawn', value='0', sizing_mode='fixed', height=20)
+m_count = pn.widgets.StaticText(name='Meteors plotted', value='0', sizing_mode='fixed', height=20)
 o_count = pn.widgets.StaticText(name='Density points', value='0', sizing_mode='fixed', height=20)
-t_count = pn.widgets.StaticText(name='Plot points', value='0', sizing_mode='fixed', height=20)
+t_count = pn.widgets.StaticText(name='Orbits fetched', value='0', sizing_mode='fixed', height=20)
 status = pn.widgets.StaticText(name='Status', value='0', sizing_mode='fixed', height=20) #, align=('end', 'end'))
 time_last = pn.widgets.StaticText(name='Latest orbit', value='0', sizing_mode='fixed', height=20)
 traj_counter = pn.widgets.StaticText(name='Orbit count all', value='0', sizing_mode='fixed', height=20)
@@ -442,10 +442,9 @@ def update_map_pane(event):
     # after drawing due to JSON error
     meteors['utc'] = pd.to_datetime(meteors['utc'])
 
-
     m_count.value = str(met_count)
-    if m_count.value == '1500':
-        m_count.value = '> 1500'
+    #if m_count.value == '1500':
+    #    m_count.value = '> 1500'
 
     # STATION LOCATIONS
     config.print_time("Adding station locations...")
