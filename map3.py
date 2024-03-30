@@ -88,10 +88,11 @@ meteor_count = 0
 update_param = ('', False, '')
 
 
+# Javascript popup class, for FOV coverage popup
 class LatLngPopup1(MacroElement):
     """
     When one clicks on a Map that contains a LatLngPopup,
-    a popup is shown that displays the latitude and longitude of the pointer.
+    a popup is shown that displays the 100km FOV coverage for that point.
 
     """
     _template = Template(u"""
@@ -103,7 +104,6 @@ class LatLngPopup1(MacroElement):
                     fovfg_008.getLayers()[0].eachLayer(
                         function(layer) { 
                             if (layer.contains(e.latlng) ) {
-                                //alert(layer.feature.properties.station);
                                 stations = stations + layer.feature.properties.station + ', ';
                                 i = i + 1;
                             }
@@ -115,7 +115,6 @@ class LatLngPopup1(MacroElement):
                     } else {
                          txt = "No coverage";
                     }
-                    //data = e.latlng.lat.toFixed(4) + "," + lat + e.latlng.lng.toFixed(4);
                     {{this.get_name()}}
                         .setLatLng(e.latlng)
                         .setContent(txt + "<br>" + stations)
@@ -156,10 +155,12 @@ def get_map(latlon=[45, 20], zoom_start=3):
     (lat, lon) = latlon
     m = fm.Map(location=[lat, lon], width='100%', height='100%', zoom_start=3, prefer_canvas=True,
                   tiles='cartodbdark_matter', zoom_control=False,)
+    # fix following two properties, to grab the JS object easily
     m._name = "groundplot"
     m._id = "007"
     llp = LatLngPopup1()
     m.add_child(llp)
+    # Javascript extension for determining if a point i inside the FOV polygon
     m.get_root().html.add_child(fm.JavascriptLink('https://cdn.rawgit.com/hayeswise/Leaflet.PointInPolygon/v1.0.0/wise-leaflet-pip.js'))
     MousePosition(position='bottomleft').add_to(m)
     return m
@@ -175,7 +176,7 @@ def add_kml(map, filt_list):
     kml_fg = fm.FeatureGroup(name='FOV 100km', show=False)
     kml_j = fm.GeoJson(
         data=kml_df,
-        tooltip=fm.GeoJsonTooltip(['station'], labels=False),
+        #tooltip=fm.GeoJsonTooltip(['station'], labels=False),
         style_function=style_fn_fov,
     )
     #kml_j._id = 'fovj'
