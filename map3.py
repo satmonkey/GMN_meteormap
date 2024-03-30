@@ -105,6 +105,7 @@ class LatLngPopup1(MacroElement):
                         function(layer) { 
                             if (layer.contains(e.latlng) ) {
                                 stations = stations + layer.feature.properties.station + ', ';
+                                groundplot_007.addLayer(layer);
                                 i = i + 1;
                             }
                         }
@@ -115,12 +116,22 @@ class LatLngPopup1(MacroElement):
                     } else {
                          txt = "No coverage";
                     }
-                    {{this.get_name()}}
-                        .setLatLng(e.latlng)
-                        .setContent(txt + "<br>" + stations)
-                        .openOn({{this._parent.get_name()}})
+                    {{this.get_name()}}.setLatLng(e.latlng).setContent(txt + "<br>" + stations).openOn({{this._parent.get_name()}})
+                }
+                function clearFOV(e) {
+                    if (e?.popup?._source?.feature?.geometry?.type === 'LineString') {
+                        return;
                     }
+                    groundplot_007.eachLayer(
+                        function(layer) {
+                            if (layer?.feature?.geometry?.type === 'MultiPolygon') {
+                                    groundplot_007.removeLayer(layer);
+                            }
+                        }
+                    );
+                }
                 {{this._parent.get_name()}}.on('click', latLngPop);
+                {{this._parent.get_name()}}.on('popupclose', clearFOV);
 
             {% endmacro %}
             """)  # noqa
