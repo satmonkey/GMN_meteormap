@@ -27,10 +27,6 @@ import config as config
 from RadiantPlot import RadiantPlot
 
 from bokeh.settings import settings
-import clipboard
-
-#js_files = {'pip': '/static/wise-leaflet-pip.js'}
-
 
 settings.resources = 'inline'
 
@@ -41,8 +37,6 @@ settings.resources = 'inline'
 pn.extension('tabulator')
 pn.extension(loading_spinner='dots', loading_color='#00aa41', sizing_mode="stretch_both")
 pn.extension()
-#pn.extension(js_files=js_files)
-
 
 pn.config.defer_load = True
 pn.config.console_output = 'replace'
