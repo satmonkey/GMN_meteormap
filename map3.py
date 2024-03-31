@@ -110,7 +110,8 @@ class LatLngPopup1(MacroElement):
                          stations = stations.slice(0,stations.length-2);
                          txt = "Covered by " + i + " camera(s):";
                     } else {
-                         txt = "No coverage";
+                        //txt = "No coverage";
+                        return;
                     }
                     {{this.get_name()}}.setLatLng(e.latlng).setContent(txt + "<br>" + stations).openOn({{this._parent.get_name()}})
                 }
