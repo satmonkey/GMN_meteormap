@@ -22,7 +22,7 @@ class RadiantPlot(param.Parameterized):
     kind = 'points'
     #kind = param.Selector(default='points', objects=['scatter', 'points'], precedence=-1)
     proj = param.Selector(default='Sinusoidal', objects=['PlateCarree', 'Sinusoidal'])
-    title = 'Radiant plot in ecliptic coordinates, Platecarree projection'
+    title = 'Radiant plot in ecliptic coordinates, Sinusoidal projection, centered at 270°'
     rasterize = param.Boolean(default=False)
     #x1 = param.Number(default=0)
     #x2 = param.Number(default=0)
@@ -54,7 +54,7 @@ class RadiantPlot(param.Parameterized):
         self.proj2 = crs.Sinusoidal(central_longitude=270)
         self.c_map = cc.glasbey_light
         self.aggregator = ds.count_cat(self.c)
-        self.title = 'Radiant plot in ecliptic coordinates, Platecarree projection'
+        #self.title = 'Radiant plot in ecliptic coordinates, Platecarree projection'
         self.hvplot_settings = {
             #'grid': True,
             'crs': self.proj1,

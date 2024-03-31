@@ -106,7 +106,7 @@ class LatLngPopup1(MacroElement):
                     );
                     if (stations.length > 0) { 
                          stations = stations.slice(0,stations.length-2);
-                         txt = "Covered by: " + i + " stations:";
+                         txt = "Covered by: " + i + " camera(s):";
                     } else {
                          txt = "No coverage";
                     }
