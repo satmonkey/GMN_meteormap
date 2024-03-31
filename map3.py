@@ -59,6 +59,11 @@ css = '''
   color: #F0F0F0;
 }
 
+.leaflet-control-layers-expanded {
+  background-color: #ff0;
+  color: #f00;
+}
+
 #.bk.bk-canvas-events {
 #  background-color: #202020;
 #  color: #202020;
@@ -175,6 +180,15 @@ def get_map(latlon=[45, 20], zoom_start=3):
     # Javascript extension for determining if the location is inside the FOV polygon
     m.get_root().html.add_child(fm.JavascriptLink('https://cdn.rawgit.com/hayeswise/Leaflet.PointInPolygon/v1.0.0/wise-leaflet-pip.js'))
     MousePosition(position='bottomleft').add_to(m)
+    # custom style for layerscontrol
+    fm.Element(
+        '<style>.leaflet-control-layers-expanded { '
+        '  /*color: red;*/'
+        '  /*background-color: yellow;*/'
+        '  opacity: 0.5;'
+        '}'
+        '</style>'
+    ).add_to(m.get_root().header)
     return m
 
 
@@ -482,8 +496,9 @@ def update_map_pane(event):
     fm.raster_layers.TileLayer('cartodbdark_matter').add_to(map)
     fm.raster_layers.TileLayer('OpenStreetMap').add_to(map)
     fm.raster_layers.TileLayer('CartoDB Positron').add_to(map)
+    #fm.raster_layers.TileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}').add_to(map)
 
-    fm.LayerControl().add_to(map)
+    fm.LayerControl(collapsed=False).add_to(map)
     folium_pane.object = map
 
     # save params to later use to find out which has been changed
