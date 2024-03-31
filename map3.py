@@ -94,11 +94,13 @@ class LatLngPopup1(MacroElement):
                 var {{this.get_name()}} = L.popup({maxWidth:500});
                 function latLngPop(e) {
                     stations = ''
+                    ids=[];
                     i = 0;
                     fovfg_008.getLayers()[0].eachLayer(
                         function(layer) { 
                             if (layer.contains(e.latlng) ) {
                                 stations = stations + layer.feature.properties.station + ', ';
+                                ids.push(layer.feature.id);
                                 groundplot_007.addLayer(layer);
                                 i = i + 1;
                             }
@@ -106,7 +108,7 @@ class LatLngPopup1(MacroElement):
                     );
                     if (stations.length > 0) { 
                          stations = stations.slice(0,stations.length-2);
-                         txt = "Covered by: " + i + " camera(s):";
+                         txt = "Covered by " + i + " camera(s):";
                     } else {
                          txt = "No coverage";
                     }
@@ -116,10 +118,13 @@ class LatLngPopup1(MacroElement):
                     if (e?.popup?._source?.feature?.geometry?.type === 'LineString') {
                         return;
                     }
+                    var sel = document.querySelector("#groundplot_007 > div.leaflet-control-container > div.leaflet-top.leaflet-right > div.leaflet-control-layers.leaflet-control > section > div.leaflet-control-layers-overlays > label:nth-child(3) > span > input")
                     groundplot_007.eachLayer(
                         function(layer) {
-                            if (layer?.feature?.geometry?.type === 'MultiPolygon') {
+                            if (layer?.feature?.geometry?.type === 'MultiPolygon' && (ids.includes(layer?.feature?.id)) ) {
+                                if (!sel.checked) {
                                     groundplot_007.removeLayer(layer);
+                                }
                             }
                         }
                     );
@@ -160,12 +165,13 @@ def get_map(latlon=[45, 20], zoom_start=3):
     (lat, lon) = latlon
     m = fm.Map(location=[lat, lon], width='100%', height='100%', zoom_start=3, prefer_canvas=True,
                   tiles='cartodbdark_matter', zoom_control=False,)
-    # fix following two properties, to grab the JS object easily
+    # fix following two properties, to grab the map object in JS easily
     m._name = "groundplot"
     m._id = "007"
+    # include the custom JS object
     llp = LatLngPopup1()
     m.add_child(llp)
-    # Javascript extension for determining if a point i inside the FOV polygon
+    # Javascript extension for determining if the location is inside the FOV polygon
     m.get_root().html.add_child(fm.JavascriptLink('https://cdn.rawgit.com/hayeswise/Leaflet.PointInPolygon/v1.0.0/wise-leaflet-pip.js'))
     MousePosition(position='bottomleft').add_to(m)
     return m
