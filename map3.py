@@ -181,14 +181,7 @@ def get_map(latlon=[45, 20], zoom_start=3):
     m.get_root().html.add_child(fm.JavascriptLink('https://cdn.rawgit.com/hayeswise/Leaflet.PointInPolygon/v1.0.0/wise-leaflet-pip.js'))
     MousePosition(position='bottomleft').add_to(m)
     # custom style for layerscontrol
-    fm.Element(
-        '<style>.leaflet-control-layers-expanded { '
-        '  /*color: red;*/'
-        '  /*background-color: yellow;*/'
-        '  opacity: 0.5;'
-        '}'
-        '</style>'
-    ).add_to(m.get_root().header)
+    fm.Element('<style>.leaflet-control-layers-expanded { opacity: 0.5; } </style>').add_to(m.get_root().header)
     return m
 
 
@@ -493,10 +486,12 @@ def update_map_pane(event):
 
     # add basemap layers and activate layer control
 
-    fm.raster_layers.TileLayer('cartodbdark_matter').add_to(map)
-    fm.raster_layers.TileLayer('OpenStreetMap').add_to(map)
-    fm.raster_layers.TileLayer('CartoDB Positron').add_to(map)
-    #fm.raster_layers.TileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}').add_to(map)
+    fm.raster_layers.TileLayer('cartodbdark_matter', show=True).add_to(map)
+    fm.raster_layers.TileLayer('OpenStreetMap', show=False).add_to(map)
+    fm.raster_layers.TileLayer('CartoDB Positron', show=False).add_to(map)
+    fm.raster_layers.TileLayer(name='World imagery', show=False, tiles='https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+	    attr='Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+    ).add_to(map)
 
     fm.LayerControl(collapsed=False).add_to(map)
     folium_pane.object = map
