@@ -1,10 +1,7 @@
 import datetime
 import pandas as pd
 import geopandas as gpd
-
-# fix for the outdated version of sqlite3
 import pysqlite3 as sqlite3
-
 import time
 import os
 import sys
@@ -630,7 +627,7 @@ def MergeMonthsToYear_by_append(year):
     conn.close()
 
 
-# Load all KML files into DB
+
 def LoadAllKMLFiles():
     files = glob.glob(os.path.join("kml/", "*.kml"))
     conn = Connect_DB(db)
