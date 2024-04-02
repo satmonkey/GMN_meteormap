@@ -219,6 +219,7 @@ def add_coords(map, filt_list):
     coord_df['now'] = time.time()
     # tranform delta seconds to days
     coord_df['delta'] = (coord_df['now'] - coord_df['last_seen']) / (60 * 60 * 24)
+    coord_df['delta'] = round(coord_df['delta'])
 
     # define a colormap for station markers
     clinear = cmp.LinearColormap(
