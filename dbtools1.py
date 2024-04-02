@@ -1,7 +1,10 @@
 import datetime
 import pandas as pd
 import geopandas as gpd
+
+# fix for the outdated version of sqlite3
 import pysqlite3 as sqlite3
+
 import time
 import os
 import sys
@@ -195,7 +198,7 @@ def Load_Data(file_path):
     file_name = os.path.basename(urlparse(file_path).path)
 
 
-    year = file_name[13:17]
+    #year = file_name[13:17]
     table = table_base
 
     # load data
@@ -275,7 +278,6 @@ def Load_KMLs(url):
     import requests
     from bs4 import BeautifulSoup
     #conn = Connect_DB(db)
-    stations = []
     ext = 'kml'
     response = requests.get(url, params=ext)
     if response.ok:
@@ -425,7 +427,7 @@ def Fetch_Data(t1, t2, filt_list, iau_list, x, y, zoom_box):
 
 def Fetch_Meteors(id_list):
     #id_list = id_list.join(',')
-    t0 = datetime.datetime.now()
+    #t0 = datetime.datetime.now()
     #sql = "SELECT DISTINCT traj_sum.* FROM " + table_base + " JOIN trajs ON traj_id = traj where traj_id in "
     sql = "SELECT DISTINCT traj_sum.* FROM " + table_base + " where traj_id in "
     sql1 = "('"
@@ -543,7 +545,6 @@ def Load_last2_days(days):
     n = 0
     # slice the file list, omit last 2 files
     data = data[-2-days:-2]
-    logtxt = ""
     for d in data:
         f = os.path.basename(urlparse(d).path)
         config.print_time("Downloading " + f + "...")
@@ -587,13 +588,13 @@ def InsertOrbits(l):
     i = 0
     j = 0
     commit_c = 0
-    config.print_time("Inserting orbits", end="")
+    config.print_time("Inserting orbits")
     for obj in l:
         try:
             cursor.execute(insert_string, (obj.orbit.traj_id, pickle.dumps(obj)))
             i = i + 1
             commit_c += 1
-            config.print_time(i, end='\r', flush=True)
+            config.print_time(i)
             if commit_c == 1000:
                 conn.commit()
                 commit_c = 0
@@ -627,7 +628,7 @@ def MergeMonthsToYear_by_append(year):
     conn.close()
 
 
-
+# Load all KML files into DB
 def LoadAllKMLFiles():
     files = glob.glob(os.path.join("kml/", "*.kml"))
     conn = Connect_DB(db)
@@ -642,7 +643,7 @@ def LoadAllKMLFiles():
     i = 0
     # save KML as JSON
     for f in files:
-        station = f[4:10]
+        #station = f[4:10]
         kml_gdf = gpd.read_file(f, driver='LIBKML')
         #json_gdf = gpd.GeoDataFrame.to_json(kml_gdf)
         #kml_gdf.to_postgis('fov', conn)
@@ -686,18 +687,20 @@ def LoadStationCoords():
         config.print_time("Error during table cleanup")
         conn.close()
 
-    sql = "insert into stations values (?,?)"
+    sql = "insert into stations values (?,?,?)"
     i = 0
 
     # create dataframe
     ids = []
     lats = []
     lons = []
+    last_seens = []
     for s in list(stations[0].keys()):
         # test if it is float number
         try:
             lat = float(stations[0][s]['lat'])
             lon = float(stations[0][s]['lon'])
+            last_seen = stations[0][s]['last']
         except:
             config.print_time("problem with coords, omitting:", s, stations[0][s]['lat'], stations[0][s]['lon'])
             #config.print_time(stations[0][s].values())
@@ -707,11 +710,13 @@ def LoadStationCoords():
         ids.append(s)
         lats.append(lat)
         lons.append(lon)
+        last_seens.append(last_seen)
 
     coords_df = pd.DataFrame({
                 'id': ids,
                 'lat': lats,
                 'lon': lons,
+                'last_seen': last_seens,
             })
     gs = gpd.points_from_xy(coords_df['lon'], coords_df['lat'])
     coords_gdf = gpd.GeoDataFrame(coords_df, crs="EPSG:4326", geometry=gs)
@@ -720,7 +725,7 @@ def LoadStationCoords():
     i = 0
     for s in coords_gdf['id']:
         try:
-            c.execute(sql, (coords_gdf['id'][i], coords_gdf['geometry'][i].wkb))
+            c.execute(sql, (coords_gdf['id'][i], coords_gdf['geometry'][i].wkb, coords_gdf['last_seen'][i]))
             i += 1
         except:
             config.print_time("insert failed...")
@@ -753,7 +758,7 @@ def AddCoords(filt_list):
     conn = Connect_DB_ro(db)
     # randomize lat and lon
     sql = "SELECT DISTINCT id, AsBinary(GeomFromText('POINT(' || (X(GeomFromWKB(geometry)) + cast(random() % 200 as REAL)/50000) || ' ' || \
-            (Y(GeomFromWKB(geometry)) + cast(random() % 200 as REAL)/50000) || ')' )) as geometry from stations where id like '"
+            (Y(GeomFromWKB(geometry)) + cast(random() % 200 as REAL)/50000) || ')' )) as geometry, last_seen from stations where id like '"
 
     for filt in filt_list:
         sql = sql + filt + "%' OR id like '"
@@ -795,8 +800,8 @@ if __name__ == "__main__":
     #Load_last2_days()
 
     LoadStationCoords()
-    Load_KMLs(stations_file_name)
-    LoadAllKMLFiles()
+    #Load_KMLs(stations_file_name)
+    #LoadAllKMLFiles()
 
     #Load_all_days()
     #MergeMonthsToYear_by_append('2021')

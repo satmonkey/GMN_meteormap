@@ -42,6 +42,9 @@ pn.config.defer_load = True
 pn.config.console_output = 'replace'
 
 
+#js_link.render()
+
+
 css = '''
 .bk.panel-widget-box {
   background: #202020;
@@ -121,7 +124,7 @@ class LatLngPopup1(MacroElement):
                     {{this.get_name()}}.setLatLng(e.latlng).setContent(txt + "<br>" + stations).openOn({{this._parent.get_name()}})
                 }
                 function clearFOV(e) {
-                    if (e?.popup?._source?.feature?.geometry?.type === 'LineString') {
+                    if (e?.popup?._source?.feature?.geometry?.type in ["LineString","Point"]) {
                         return;
                     }
                     var sel = document.querySelector("#groundplot_007 > div.leaflet-control-container > div.leaflet-top.leaflet-right > div.leaflet-control-layers.leaflet-control > section > div.leaflet-control-layers-overlays > label:nth-child(3) > span > input")
@@ -172,8 +175,8 @@ def get_map(latlon=[45, 20], zoom_start=3):
     m = fm.Map(location=[lat, lon], width='100%', height='100%', zoom_start=3, prefer_canvas=True,
                   tiles='cartodbdark_matter', zoom_control=False,)
     # fix following two properties, to grab the map object in JS easily
-    m._name = "groundplot"
-    m._id = "007"
+    m._name = 'groundplot'
+    m._id = '007'
     # include the custom JS object
     llp = LatLngPopup1()
     m.add_child(llp)
@@ -182,6 +185,7 @@ def get_map(latlon=[45, 20], zoom_start=3):
     MousePosition(position='bottomleft').add_to(m)
     # custom style for layerscontrol
     fm.Element('<style>.leaflet-control-layers-expanded { opacity: 0.5; } </style>').add_to(m.get_root().header)
+    #m.get_root().html.add_child(fm.JavascriptLink('assets/js/macro.js'))
     return m
 
 
@@ -212,21 +216,41 @@ def add_coords(map, filt_list):
     if len(coord_df) == 0:
         return 0
     coord_df = coord_df.set_crs('EPSG:4326')
+    coord_df['now'] = time.time()
+    # tranform delta seconds to days
+    coord_df['delta'] = (coord_df['now'] - coord_df['last_seen']) / (60 * 60 * 24)
+
+    # define a colormap for station markers
+    clinear = cmp.LinearColormap(
+        colors=['green', 'yellow', 'red'],
+        vmin=2,
+        vmax=30,
+        caption='Max. inactivity'
+    )
+
+    style_function = lambda x: {
+        'weight': 4,
+        'color': clinear(x['properties']['delta']),
+        'fillColor': clinear(x['properties']['delta']),
+        'fillOpacity': 0.75
+    }
 
     coord_fg = fm.FeatureGroup(name='stations', show=False)
     coord_j = fm.GeoJson(
         data=coord_df,
         marker=fm.Circle(popup='tady'),
-        popup=[coord_df['id']],
-        tooltip=fm.GeoJsonTooltip(['id'], labels=False),
-        style_function=style_fn_coords
+        #popup=[coord_df['id']],
+        tooltip=fm.GeoJsonTooltip(['id','delta'], labels=False),
+        popup = fm.GeoJsonPopup(['id']),
+        style_function=style_function
     )
 
     marker_cluster = fm.plugins.MarkerCluster(name='stations', show=True)
-    #marker = fm.Marker(name='stations',
-    #                   tooltip=)
     marker_cluster.add_to(coord_fg)
     coord_j.add_to(coord_fg)
+
+    #llp = LatLngPopup1()
+    #coord_fg.add_child(llp)
 
     #coord_fg.add_child(coord_j)
     #return marker_cluster
@@ -236,25 +260,28 @@ def add_coords(map, filt_list):
 # Queries the DB for meteors within the filter and draws them on the map
 def add_meteors(map, m):
 
-    # limit orbits if > 100
+    # limit orbits by selecting random 1500 orbits if > 1500
     if len(m) > 1500:
         m = gpd.GeoDataFrame.sample(m, 1500, replace=True)
 
     m = m.set_crs('EPSG:4326')
 
     # define a colormap for meteors
-    clinear = cmp.LinearColormap(colors=['red', 'yellow', 'green'],
-                            vmin=-5,
-                            vmax=2,
-                            caption='Max. magnitude'
-            )
+    clinear = cmp.LinearColormap(
+        colors=['red', 'yellow', 'green'],
+        vmin=-5,
+        vmax=2,
+        caption='Max. magnitude'
+    )
 
-    meteor_dict = m.set_index('traj_id')['peak_mag']
+    #meteor_dict = m.set_index('traj_id')['peak_mag']
 
-    style_function = lambda x: {'weight': 4,
+    style_function = lambda x: {
+        'weight': 4,
         'color': clinear(x['properties']['peak_mag']),
         'fillColor': clinear(x['properties']['peak_mag']),
-        'fillOpacity': 0.75}
+        'fillOpacity': 0.75
+    }
 
     # Exclusion popup list, those fields will not be shown as popup
     drop_list = ['geometry', 'fov_end', 'fov_beg', 'mfe', 'Qc', 'f_param', 'peak_ht', 'rend_lon', \
@@ -264,8 +291,6 @@ def add_meteors(map, m):
 
     # create overlay for meteors
     if m.shape[0] > 0:
-        # to avoid error, date must be converted to a string
-        #meteors['utc'] = meteors['utc'].astype(str)
         m.explore(style_kwds={"weight": 10})
         svg_style = '<style>svg {background-color: white;}</style>'
         map.get_root().header.add_child(fm.Element(svg_style))
@@ -275,14 +300,9 @@ def add_meteors(map, m):
         meteors_j = fm.features.GeoJson(
             m,
             name='meteors',
-            #style_function=style_fn_meteors,
             style_function=style_function,
             tooltip=tooltip,
             popup=popup,
-            #highlight=True,
-            #line_color='lightgreen',
-            #line_weight=3,
-            #line_color=clinear('peak_mag')
         )
         map.add_child(meteors_j)
         map.keep_in_front(meteors_j)
