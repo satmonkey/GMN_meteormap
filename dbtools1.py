@@ -666,13 +666,12 @@ def LoadStationCoords():
     f = config.stations_pickle
     stations = []
     with (open(f, "rb")) as openfile:
-        while True:
-            try:
-                stations.append(pickle.load(openfile))
-            except EOFError:
-                config.print_time("Error when loading pickle file...", f)
-                #conn.close()
-                break
+        try:
+            stations.append(pickle.load(openfile))
+        except EOFError:
+            config.print_time("Error when loading pickle file...", f)
+            conn.close()
+            exit()
 
 
     c = conn.cursor()
