@@ -218,14 +218,15 @@ def add_coords(map, filt_list):
     coord_df = coord_df.set_crs('EPSG:4326')
     coord_df['now'] = time.time()
     # tranform delta seconds to days
-    coord_df['delta'] = (coord_df['now'] - coord_df['last_seen']) / (60 * 60 * 24)
-    coord_df['delta'] = round(coord_df['delta'])
+    coord_df['delta'] = round((coord_df['now'] - coord_df['last_seen']) / (60 * 60 * 24))
+    coord_df['popup'] = 'seen ' + (coord_df['delta'].astype(int) - 1).astype(str) + ' days ago'
+    #coord_df['delta'] = 'last seen: ' + str(round(coord_df['delta'])-1) + ' days ago'
 
     # define a colormap for station markers
     clinear = cmp.LinearColormap(
         colors=['green', 'yellow', 'red'],
         vmin=2,
-        vmax=30,
+        vmax=10,
         caption='Max. inactivity'
     )
 
@@ -241,8 +242,8 @@ def add_coords(map, filt_list):
         data=coord_df,
         marker=fm.Circle(popup='tady'),
         #popup=[coord_df['id']],
-        tooltip=fm.GeoJsonTooltip(['id','delta'], labels=False),
-        popup = fm.GeoJsonPopup(['id']),
+        tooltip=fm.GeoJsonTooltip(['id','popup'], labels=False),
+        popup = fm.GeoJsonPopup(['id'], labels=False),
         style_function=style_function
     )
 
