@@ -212,6 +212,12 @@ def add_kml(map, filt_list):
 
 # Adds coordinates as station locations within the filter
 def add_coords(map, filt_list):
+
+
+    def getHTML(row):
+        return '<a href="https://globalmeteornetwork.org/weblog/' + row['id'][:2] + '/' + \
+            row['id'] + '/" target="_blank">Weblog</a>'
+
     coord_df = dbtools.AddCoords(filt_list)
     if len(coord_df) == 0:
         return 0
@@ -219,8 +225,14 @@ def add_coords(map, filt_list):
     coord_df['now'] = time.time()
     # tranform delta seconds to days
     coord_df['delta'] = round((coord_df['now'] - coord_df['last_seen']) / (60 * 60 * 24))
-    coord_df['popup'] = 'seen ' + (coord_df['delta'].astype(int) - 1).astype(str) + ' day(s) ago'
-    #coord_df['delta'] = 'last seen: ' + str(round(coord_df['delta'])-1) + ' days ago'
+    coord_df['tooltip'] = 'seen ' + (coord_df['delta'].astype(int) - 1).astype(str) + ' day(s) ago'
+
+    # create HTML popup
+    coord_df['html'] = coord_df.apply(getHTML, axis=1)
+    popup_html = fm.GeoJsonPopup(
+        labels=False,
+        fields=['id','html'],
+    )
 
     # define a colormap for station markers
     clinear = cmp.LinearColormap(
@@ -242,8 +254,8 @@ def add_coords(map, filt_list):
         data=coord_df,
         marker=fm.Circle(popup='tady'),
         #popup=[coord_df['id']],
-        tooltip=fm.GeoJsonTooltip(['id','popup'], labels=False),
-        popup = fm.GeoJsonPopup(['id'], labels=False),
+        tooltip=fm.GeoJsonTooltip(['id','tooltip'], labels=False),
+        popup = popup_html,
         style_function=style_function
     )
 
