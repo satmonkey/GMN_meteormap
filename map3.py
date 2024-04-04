@@ -213,7 +213,6 @@ def add_kml(map, filt_list):
 # Adds coordinates as station locations within the filter
 def add_coords(map, filt_list):
 
-
     def getHTML(row):
         return '<a href="https://globalmeteornetwork.org/weblog/' + row['id'][:2] + '/' + \
             row['id'] + '/" target="_blank">Weblog</a>'
@@ -262,9 +261,6 @@ def add_coords(map, filt_list):
     marker_cluster = fm.plugins.MarkerCluster(name='stations', show=True)
     marker_cluster.add_to(coord_fg)
     coord_j.add_to(coord_fg)
-
-    #llp = LatLngPopup1()
-    #coord_fg.add_child(llp)
 
     #coord_fg.add_child(coord_j)
     #return marker_cluster
@@ -442,7 +438,7 @@ def update_map_pane(event):
 
     config.t0 = time.time()
     meteors = []
-    config.print_time("Updating...", filt.value_input, iau.value_input)
+    config.print_time("Updating...", " stations: ", filt.value_input, " showers: ", iau.value_input, " from: ", dt1.value, " to: ", dt2.value)
     status.value = 'Updating data'
     file_suffix = '_' + "dummy"
 
