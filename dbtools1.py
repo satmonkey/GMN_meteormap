@@ -761,7 +761,7 @@ def AddCoords(filt_list):
 
     for filt in filt_list:
         sql = sql + filt + "%' OR id like '"
-    sql = sql + "DEADBEEF'"
+    sql = sql + "DEADBEEF' order by last_seen desc"
     #config.print_time(sql)
     coords = gpd.read_postgis(sql, conn, geom_col='geometry')
     conn.close()
