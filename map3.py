@@ -223,8 +223,8 @@ def add_coords(map, filt_list):
     coord_df = coord_df.set_crs('EPSG:4326')
     coord_df['now'] = time.time()
     # tranform delta seconds to days
-    coord_df['delta'] = round((coord_df['now'] - coord_df['last_seen']) / (60 * 60 * 24))
-    coord_df['tooltip'] = 'seen ' + (coord_df['delta'].astype(int) - 1).astype(str) + ' day(s) ago'
+    coord_df['delta'] = round((coord_df['now'] - coord_df['last_seen']) / (60 * 60 * 24) - 1.5)
+    coord_df['tooltip'] = 'seen ' + (coord_df['delta'].astype(int)).astype(str) + ' day(s) ago'
 
     # create HTML popup
     coord_df['html'] = coord_df.apply(getHTML, axis=1)
@@ -479,7 +479,7 @@ def update_map_pane(event):
     #config.print_time(len(id_list))
     config.print_time("Fetching meteors...")
     meteors = dbtools.Fetch_Meteors(id_list)
-    meteors = meteors[:100000]
+    #meteors = meteors[:100000]
     t_count.value = str(meteors.shape[0])
 
     # Updating the Folium meteor map
