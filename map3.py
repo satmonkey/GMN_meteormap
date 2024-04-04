@@ -450,7 +450,16 @@ def update_map_pane(event):
     map = get_map()
 
     # split the filter elements, if used
-    filt_list = filt.value_input.split(',')
+    if ';' in filt.value:
+        filt_list = filt.value_input.split(';')
+        op = ';'
+    elif ',' in filt.value:
+        filt_list = filt.value_input.split(',')
+        op = ','
+    else:
+        filt_list = ['%']
+        op = ''
+    
     iau_list = iau.value_input.split(',')
 
     # detect famous hacking technique and refuse the filter if needed
@@ -474,7 +483,7 @@ def update_map_pane(event):
 
     # main select DB query
     # fetch list of ID's based on filter
-    id_list = dbtools.Fetch_IDs(dt1.value, dt2.value, filt_list, iau_list, rp.x, rp.y, zoom_box)
+    id_list = dbtools.Fetch_IDs(dt1.value, dt2.value, filt_list, op, iau_list, rp.x, rp.y, zoom_box)
 
     #config.print_time(len(id_list))
     config.print_time("Fetching meteors...")

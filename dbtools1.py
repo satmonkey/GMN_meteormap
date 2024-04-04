@@ -308,13 +308,26 @@ def Table_exists(table, conn):
         return True
 
 
-def Fetch_IDs(t1, t2, filt_list, iau_list, x, y, zoom_box):
+def Fetch_IDs(t1, t2, filt_list, station_op, iau_list, x, y, zoom_box):
 
-    sql = "SELECT traj_id FROM " + table_base + " where (Stations like '"
+
+    sql = "SELECT traj_id FROM " + table_base + " where ("
     for filt in filt_list:
-        sql = sql + filt + "%' OR Stations like '%," + filt + "%' OR Stations like '"
-    sql = sql + "DEADBEEF') AND "
+        if station_op == ';':
+            sql = sql + "(Stations like '" + filt + "%' OR Stations like '%," + filt + "%') AND "
+        elif station_op == ',':
+            sql = sql + "(Stations like '" + filt + "%' OR Stations like '%," + filt + "%') OR "
+        else:
+            sql = sql + "(Stations like '" + filt + "%' OR Stations like '%," + filt + "%') AND "
+    
+    if station_op == ';':
+        sql = sql + " 1=1) AND "
+    elif station_op == ',':
+        sql = sql + " 1=2) AND "
+    else:
+        sql = sql + " 1=1) AND "
 
+    ...
     # zoom filter
     sql = sql + "(" + x + " between " + str(zoom_box[0]) + " AND " + str(zoom_box[1]) + ") AND (" + \
         y + " between " + str(zoom_box[2]) + " AND " + str(zoom_box[3]) + ") AND ("
@@ -325,8 +338,8 @@ def Fetch_IDs(t1, t2, filt_list, iau_list, x, y, zoom_box):
     sql = sql + "1=2) "
 
     # time filter
-    sql = sql + "AND (datetime(utc) BETWEEN datetime('" + str(t1) + "') AND datetime('" + str(t2) + "'))"
-    #config.print_time(sql)
+    sql = sql + "AND (datetime(utc) BETWEEN datetime('" + str(t1) + "') AND datetime('" + str(t2) + "')) LIMIT 100000"
+    config.print_time(sql)
     conn = Connect_DB(db)
     c = conn.cursor()
     c.execute(sql)
@@ -424,7 +437,7 @@ def Fetch_Data(t1, t2, filt_list, iau_list, x, y, zoom_box):
     conn.close()
     return data
 
-
+# fetch meteors from the DB using filters
 def Fetch_Meteors(id_list):
     #id_list = id_list.join(',')
     #t0 = datetime.datetime.now()
