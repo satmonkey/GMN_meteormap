@@ -219,7 +219,7 @@ def add_coords(map, filt_list):
     coord_df['now'] = time.time()
     # tranform delta seconds to days
     coord_df['delta'] = round((coord_df['now'] - coord_df['last_seen']) / (60 * 60 * 24))
-    coord_df['popup'] = 'seen ' + (coord_df['delta'].astype(int) - 1).astype(str) + ' days ago'
+    coord_df['popup'] = 'seen ' + (coord_df['delta'].astype(int) - 1).astype(str) + ' day(s) ago'
     #coord_df['delta'] = 'last seen: ' + str(round(coord_df['delta'])-1) + ' days ago'
 
     # define a colormap for station markers
