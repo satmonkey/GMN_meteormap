@@ -108,9 +108,12 @@ class LatLngPopup1(MacroElement):
                     stations = ''
                     ids=[];
                     i = 0;
+                    latlon = e.latlng;
+                    lat = e.latlng['lat'];
+                    lon = e.latlng['lng'];
                     fovfg_008.getLayers()[0].eachLayer(
                         function(layer) { 
-                            if (layer.contains(e.latlng) ) {
+                            if (layer.contains(latlon) ) {
                                 stations = stations + layer.feature.properties.station + ', ';
                                 ids.push(layer.feature.id);
                                 groundplot_007.addLayer(layer);
@@ -120,7 +123,7 @@ class LatLngPopup1(MacroElement):
                     );
                     if (stations.length > 0) { 
                          stations = stations.slice(0,stations.length-2);
-                         txt = "lat=" + e.latlng['lat'].toFixed(4) + ", lon=" + e.latlng['lng'].toFixed(4) + "<br>"
+                         txt = "lat=" + lat.toFixed(4) + ", lon=" + lon.toFixed(4) + "<br>"
                          txt = txt + "Covered by " + i + " camera(s):";
                     } else {
                         //txt = "No coverage";
@@ -466,10 +469,10 @@ def update_map_pane(event):
     map = get_map()
 
     # split the filter elements, if used
-    if ';' in filt.value:
+    if ';' in filt.value_input:
         filt_list = filt.value_input.split(';')
         op = ';'
-    elif ',' in filt.value:
+    elif ',' in filt.value_input:
         filt_list = filt.value_input.split(',')
         op = ','
     else:
