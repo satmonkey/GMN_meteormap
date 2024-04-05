@@ -28,6 +28,10 @@ from RadiantPlot import RadiantPlot
 
 from bokeh.settings import settings
 
+# imports for file download
+from bokeh.sampledata.autompg import autompg
+from io import StringIO
+
 settings.resources = 'inline'
 
 #os.environ['PROJ_LIB'] = r'd:\ProgramData\Anaconda3\envs\panel\Library\share\basemap>'
@@ -329,6 +333,13 @@ def w_update(x_range, y_range):
     rp.xr, rp.yr = x_range, y_range
 
 
+def download_callback():
+    sio = StringIO()
+    dv.value.to_csv(sio)
+    sio.seek(0)
+    return sio
+
+
 ###################################################
 ###################################################
 # main code part
@@ -364,6 +375,7 @@ time_last = pn.widgets.StaticText(name='Latest orbit', value='0', sizing_mode='f
 traj_counter = pn.widgets.StaticText(name='Orbit count all', value='0', sizing_mode='fixed', height=20)
 
 
+
 x1 = pn.widgets.TextInput(name='x1', value='0', sizing_mode='fixed', width=50)
 x2 = pn.widgets.TextInput(name='x2', value='360', sizing_mode='fixed', width=50)
 y1 = pn.widgets.TextInput(name='y1', value='-90', sizing_mode='fixed', width=50)
@@ -381,6 +393,9 @@ meteors_pd['shower_code'] = meteors_pd['shower_code'].astype('category')
 
 dv = pn.widgets.Tabulator(meteors_pd, sizing_mode='stretch_both', max_height=800, max_width=1900, page_size=100,
                           row_height=20, show_index=False, pagination='remote', theme='midnight')
+file_download = pn.widgets.FileDownload(callback=download_callback, button_type='success', auto=True, embed=False, filename='orbits.csv', 
+                            width=100, height=25, label='Download CSV')
+
 
 # radiant plot
 x = pn.widgets.Select(name='x', value='SCE_g', options=['ra_g', 'L_g', 'pi', 'SCE_g', 'SCE_h'])
@@ -690,7 +705,8 @@ view = pn.Row(
                 'Data',
                 pn.Column(
                     dv,
-                    sizing_mode='stretch_both', max_height=750, max_width=1650
+                    file_download,
+                    sizing_mode='stretch_both', max_height=700, max_width=1650
                 )
             ),
             
