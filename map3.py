@@ -120,7 +120,8 @@ class LatLngPopup1(MacroElement):
                     );
                     if (stations.length > 0) { 
                          stations = stations.slice(0,stations.length-2);
-                         txt = "Covered by " + i + " camera(s):";
+                         txt = "lat=" + e.latlng['lat'].toFixed(4) + ", lon=" + e.latlng['lng'].toFixed(4) + "<br>"
+                         txt = txt + "Covered by " + i + " camera(s):";
                     } else {
                         //txt = "No coverage";
                         return;
