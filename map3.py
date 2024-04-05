@@ -240,8 +240,8 @@ def add_coords(map, filt_list):
     # define a colormap for station markers
     clinear = cmp.LinearColormap(
         colors=['green', 'yellow', 'red'],
-        vmin=2,
-        vmax=10,
+        vmin=1,
+        vmax=7,
         caption='Max. inactivity'
     )
 
@@ -555,7 +555,6 @@ def update_map_pane(event):
 
     status.value = 'Ground plot updated'
 
-
     # Update HVPLOT dataframe
     #################################################
     config.print_time("Updating hvplot dataframe...")
@@ -565,17 +564,11 @@ def update_map_pane(event):
     meteors_pd['day'] = meteors_pd['utc'].dt.dayofyear
     #meteors_pd['shower_code'] = meteors_pd['shower_code'].astype('category')
 
-    # limit HVPLOT to 5 000 points
-    #if len(meteors_pd) > 5000:
-    #    meteors_pd = meteors_pd.sample(5000, replace=True)
-    #    t_count.value = "> 5000"
-
     config.print_time("Updating meteor PD object...")
     #config.print_time(meteors_pd)
     dv.value = meteors_pd
 
     # update the RPLOT by a new data
-    #config.print_time("Updating radiant plot...")
     rp.df = meteors_pd
 
     view.loading = False
