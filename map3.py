@@ -370,8 +370,8 @@ y1 = pn.widgets.TextInput(name='y1', value='-90', sizing_mode='fixed', width=50)
 y2 = pn.widgets.TextInput(name='y2', value='90', sizing_mode='fixed', width=50)
 
 autozoom = pn.widgets.Checkbox(name='Auto zoom', sizing_mode='fixed', width=160)
-update = pn.widgets.Button(name='Update', button_type='primary', margin=5, sizing_mode='fixed', width=70, description="Parameters update")
-quick_download = pn.widgets.Button(name='Quick refresh', button_type='primary', margin=5, sizing_mode='fixed', width=70, description="Get latest data from GMN")
+update = pn.widgets.Button(name='Update', button_type='primary', sizing_mode='fixed', description="Parameters update")
+quick_download = pn.widgets.Button(name='Quick refresh', button_type='primary', sizing_mode='fixed', description="Get latest data from GMN")
 
 m_count = pn.widgets.StaticText(name='Meteors plotted', value='0', sizing_mode='fixed', height=20)
 o_count = pn.widgets.StaticText(name='Density points', value='0', sizing_mode='fixed', height=20)
@@ -650,11 +650,21 @@ view = pn.Row(
             y1,
             y2,
        ),
-        autozoom,
-        update,
-        quick_download,
+        #autozoom,
+        pn.Row(
+            update,
+            pn.widgets.TooltipIcon(value="Update parameters", align=('center','start')),
+            height=40,
+            width=160,
+        ),
+        pn.Row(
+            quick_download,
+            pn.widgets.TooltipIcon(value="Get latest data from GMN"),#, align=('start','center')),
+            height=40,
+            width=160,
+        ),   
         width=190,
-        height=550,
+        height=520,
         #align='start',
         sizing_mode='fixed',
         #height_policy='min',
