@@ -355,21 +355,23 @@ map_scale1 = (0, 360)
 map_scale2 = (-180, 180)
 map_scale3 = (-270, 90)
 
+# populate the dataframe column names
 meteors_pd = pd.DataFrame(columns = list(dbtools.orbit_dtypes.keys()))
 
 dt1 = pn.widgets.DatetimePicker(name='From', value=datetime.now() - timedelta(days=3),  sizing_mode='fixed', width=160)
 dt2 = pn.widgets.DatetimePicker(name='To', value=datetime.now(),  sizing_mode='fixed', width=160)
 
-filt = pn.widgets.TextInput(name='Station filter', placeholder="Enter e.g. CZ,DE", value='', sizing_mode='fixed', width=200)
-iau = pn.widgets.TextInput(name='Shower & radiant filter', placeholder='Enter e.g. ORI,PER', value='', sizing_mode='fixed', width=200)
+filt = pn.widgets.TextInput(name='Station filter', placeholder="Enter e.g. CZ,DE", value='', sizing_mode='fixed', width=160)
+iau = pn.widgets.TextInput(name='Shower & radiant filter', placeholder='Enter e.g. ORI,PER', value='', sizing_mode='fixed', width=160)
 
-autozoom = pn.widgets.Checkbox(name='Auto zoom', sizing_mode='fixed', width=100)
-fov = pn.widgets.Checkbox(name='FOV 100km', sizing_mode='fixed', width=10)
+x1 = pn.widgets.TextInput(name='x1', value='0', sizing_mode='fixed', width=50)
+x2 = pn.widgets.TextInput(name='x2', value='360', sizing_mode='fixed', width=50)
+y1 = pn.widgets.TextInput(name='y1', value='-90', sizing_mode='fixed', width=50)
+y2 = pn.widgets.TextInput(name='y2', value='90', sizing_mode='fixed', width=50)
 
-# Update button
-update = pn.widgets.Button(name='Update', button_type='primary', margin=5, sizing_mode='fixed', width=70)
-quick_download = pn.widgets.Button(name='Quick download', button_type='primary', margin=5, sizing_mode='fixed', width=70)
-
+autozoom = pn.widgets.Checkbox(name='Auto zoom', sizing_mode='fixed', width=160)
+update = pn.widgets.Button(name='Update', button_type='primary', margin=5, sizing_mode='fixed', width=70, description="Parameters update")
+quick_download = pn.widgets.Button(name='Quick refresh', button_type='primary', margin=5, sizing_mode='fixed', width=70, description="Get latest data from GMN")
 
 m_count = pn.widgets.StaticText(name='Meteors plotted', value='0', sizing_mode='fixed', height=20)
 o_count = pn.widgets.StaticText(name='Density points', value='0', sizing_mode='fixed', height=20)
@@ -378,13 +380,7 @@ status = pn.widgets.StaticText(name='Status', value='0', sizing_mode='fixed', he
 time_last = pn.widgets.StaticText(name='Latest orbit', value='0', sizing_mode='fixed', height=20)
 traj_counter = pn.widgets.StaticText(name='Orbit count all', value='0', sizing_mode='fixed', height=20)
 
-
-
-x1 = pn.widgets.TextInput(name='x1', value='0', sizing_mode='fixed', width=50)
-x2 = pn.widgets.TextInput(name='x2', value='360', sizing_mode='fixed', width=50)
-y1 = pn.widgets.TextInput(name='y1', value='-90', sizing_mode='fixed', width=50)
-y2 = pn.widgets.TextInput(name='y2', value='90', sizing_mode='fixed', width=50)
-
+# read some sample data to avoid startup errors
 meteors_pd = pd.read_csv('meteory01.csv')
 meteors_pd['utc'] = pd.to_datetime(meteors_pd['utc'])
 meteors_pd['day'] = meteors_pd['utc'].dt.dayofyear
@@ -393,7 +389,6 @@ meteors_pd['SCE_h'] = meteors_pd['L_h'] - meteors_pd['la_sun']
 meteors_pd['SCE_g'] = (- meteors_pd['SCE_g']) + (360 * meteors_pd['SCE_g'] < 0)
 meteors_pd['SCE_h'] = (- meteors_pd['SCE_h']) + (360 * meteors_pd['SCE_h'] < 0)
 meteors_pd['shower_code'] = meteors_pd['shower_code'].astype('category')
-
 
 dv = pn.widgets.Tabulator(meteors_pd, sizing_mode='stretch_both', max_height=800, max_width=1900, page_size=100,
                           row_height=20, show_index=False, pagination='remote', theme='midnight')
@@ -442,7 +437,7 @@ hvplot.output(backend='bokeh')
 
 latlon = [0, 0]
 autozoom.value = True
-fov.value = False
+#fov.value = False
 
 
 # create the hvplot object
@@ -555,7 +550,7 @@ def update_map_pane(event):
     folium_pane.object = map
 
     # save params to later use to find out which has been changed
-    update_param = (filt.value, fov.value, iau.value)
+    update_param = (filt.value, iau.value)
 
     status.value = 'Ground plot updated'
 
@@ -619,7 +614,7 @@ def update_map_pane_period(dayss):
 #############################################################################
 
 
-p = pn.template.VanillaTemplate(title="GMN Meteor Map", theme='dark')
+p = pn.template.BootstrapTemplate(title="GMN Meteor Map", theme='dark')
 
 #register update action
 update.on_click(update_map_pane)
@@ -644,38 +639,26 @@ folium_pane = pn.pane.plot.Folium(sizing_mode="stretch_both", margin=0, min_heig
 view = pn.Row(
     pn.Column(
         dt1,
-        pn.Row(
-            pn.Column(
-                dt2,
-            ),
-            pn.Column(
-                #refresh_days,
-                sizing_mode='fixed', width=15, margin=(20, 45, 0, 0)
-            ),
-            sizing_mode='fixed', height=60, width=200,
-        ),
+        dt2,
         filt,
         iau,
         pn.Row(
             x1,
-            x2
+            x2,
         ),
         pn.Row(
             y1,
             y2,
        ),
         autozoom,
-        pn.Row(
-            #fov,
-            update,
-            quick_download,
-            ),
-        width=215, 
-        height=450,
-        sizing_mode='fixed', 
+        update,
+        quick_download,
+        width=190,
+        height=550,
+        #align='start',
+        sizing_mode='fixed',
         #height_policy='min',
     ),
-
     pn.Column(
         pn.Tabs(
             (
