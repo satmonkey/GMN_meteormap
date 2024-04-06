@@ -370,8 +370,8 @@ y1 = pn.widgets.TextInput(name='y1', value='-90', sizing_mode='fixed', width=50)
 y2 = pn.widgets.TextInput(name='y2', value='90', sizing_mode='fixed', width=50)
 
 autozoom = pn.widgets.Checkbox(name='Auto zoom', sizing_mode='fixed', width=160)
-update = pn.widgets.Button(name='Update', button_type='primary', sizing_mode='fixed', description="Parameters update")
-quick_download = pn.widgets.Button(name='Quick refresh', button_type='primary', sizing_mode='fixed', description="Get latest data from GMN")
+update = pn.widgets.Button(name='Update', button_type='primary', sizing_mode='fixed')
+quick_download = pn.widgets.Button(name='Quick refresh', button_type='primary', sizing_mode='fixed')
 
 m_count = pn.widgets.StaticText(name='Meteors plotted', value='0', sizing_mode='fixed', height=20)
 o_count = pn.widgets.StaticText(name='Density points', value='0', sizing_mode='fixed', height=20)
@@ -614,7 +614,7 @@ def update_map_pane_period(dayss):
 #############################################################################
 
 
-p = pn.template.BootstrapTemplate(title="GMN Meteor Map", theme='dark')
+p = pn.template.VanillaTemplate(title="GMN Meteor Map", theme='dark')
 
 #register update action
 update.on_click(update_map_pane)
@@ -664,7 +664,7 @@ view = pn.Row(
             width=160,
         ),   
         width=190,
-        height=520,
+        height=440,
         #align='start',
         sizing_mode='fixed',
         #height_policy='min',
