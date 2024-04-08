@@ -94,67 +94,22 @@ meteor_count = 0
 update_param = ('', False, '')
 
 
-# Javascript popup class, for FOV coverage popup
-class LatLngPopup1(MacroElement):
-    """
-    When one clicks on a Map that contains a LatLngPopup,
-    a popup is shown that displays the 100km FOV coverage for that point.
+# Javascript custom functions for the folium map
+class foliumjs(MacroElement):
 
-    """
-    _template = Template(u"""
-            {% macro script(this, kwargs) %}
-                var {{this.get_name()}} = L.popup({maxWidth:500});
-                function latLngPop(e) {
-                    stations = ''
-                    ids=[];
-                    i = 0;
-                    latlon = e.latlng;
-                    lat = e.latlng['lat'];
-                    lon = e.latlng['lng'];
-                    fovfg_008.getLayers()[0].eachLayer(
-                        function(layer) { 
-                            if (layer.contains(latlon) ) {
-                                stations = stations + layer.feature.properties.station + ', ';
-                                ids.push(layer.feature.id);
-                                groundplot_007.addLayer(layer);
-                                i = i + 1;
-                            }
-                        }
-                    );
-                    if (stations.length > 0) { 
-                         stations = stations.slice(0,stations.length-2);
-                         txt = "lat=" + lat.toFixed(4) + ", lon=" + lon.toFixed(4) + "<br>"
-                         txt = txt + "Covered by " + i + " camera(s):";
-                    } else {
-                        //txt = "No coverage";
-                        return;
-                    }
-                    {{this.get_name()}}.setLatLng(e.latlng).setContent(txt + "<br>" + stations).openOn({{this._parent.get_name()}})
-                }
-                function clearFOV(e) {
-                    if (e?.popup?._source?.feature?.geometry?.type in ["LineString","Point"]) {
-                        return;
-                    }
-                    var sel = document.querySelector("#groundplot_007 > div.leaflet-control-container > div.leaflet-top.leaflet-right > div.leaflet-control-layers.leaflet-control > section > div.leaflet-control-layers-overlays > label:nth-child(3) > span > input")
-                    groundplot_007.eachLayer(
-                        function(layer) {
-                            if (layer?.feature?.geometry?.type === 'MultiPolygon' && (ids.includes(layer?.feature?.id)) ) {
-                                if (!sel.checked) {
-                                    groundplot_007.removeLayer(layer);
-                                }
-                            }
-                        }
-                    );
-                }
-                {{this._parent.get_name()}}.on('click', latLngPop);
-                {{this._parent.get_name()}}.on('popupclose', clearFOV);
+    js_file = 'assets/js/macro.js'
+    js_txt = '{% macro script(this, kwargs) %}'
+    
+    with open(js_file, 'r') as file:
+        js_txt += file.read()
 
-            {% endmacro %}
-            """)  # noqa
+    js_txt += '{% endmacro %}'
+    _template = Template(js_txt)
 
     def __init__(self):
-        super(LatLngPopup1, self).__init__()
-        self._name = 'LatLngPopup'
+        super(foliumjs, self).__init__()
+        self._name = 'foliumjs'
+
 
 
 # Create some nice style
@@ -186,8 +141,8 @@ def get_map(latlon=[45, 20], zoom_start=3):
     m._name = 'groundplot'
     m._id = '007'
     # include the custom JS object
-    llp = LatLngPopup1()
-    m.add_child(llp)
+    fmjs = foliumjs()
+    m.add_child(fmjs)
     # Javascript extension for determining if the location is inside the FOV polygon
     m.get_root().html.add_child(fm.JavascriptLink('https://cdn.rawgit.com/hayeswise/Leaflet.PointInPolygon/v1.0.0/wise-leaflet-pip.js'))
     MousePosition(position='bottomleft').add_to(m)
@@ -231,7 +186,7 @@ def add_coords(map, filt_list):
     coord_df = coord_df.set_crs('EPSG:4326')
     coord_df['now'] = time.time()
     # tranform delta seconds to days
-    coord_df['delta'] = round((coord_df['now'] - coord_df['last_seen']) / (60 * 60 * 24) - 1.5)
+    coord_df['delta'] = round((coord_df['now'] - coord_df['last_seen']) / (60 * 60 * 24)- 0.5)
     coord_df['tooltip'] = 'seen ' + (coord_df['delta'].astype(int)).astype(str) + ' day(s) ago'
 
     # create HTML popup
