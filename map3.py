@@ -112,6 +112,21 @@ class foliumjs(MacroElement):
 
 
 
+class stationjs(MacroElement):
+    js_file = 'assets/js/stations.js'
+    js_txt = '{% macro script(this, kwargs) %}'
+    
+    with open(js_file, 'r') as file:
+        js_txt += file.read()
+
+    js_txt += '{% endmacro %}'
+    _template = Template(js_txt)
+
+    def __init__(self):
+        super(stationjs, self).__init__()
+        self._name = 'stationjs'
+
+
 # Create some nice style
 def style_fn_meteors(x):
     return {"color": "lightgreen", "weight": 3, "opacity": 0.05, "fillOpacity": 0.1}
@@ -214,12 +229,16 @@ def add_coords(map, filt_list):
     coord_fg = fm.FeatureGroup(name='stations', show=False)
     coord_j = fm.GeoJson(
         data=coord_df,
-        marker=fm.Circle(popup='tady'),
+        marker=fm.Circle(),
         #popup=[coord_df['id']],
         tooltip=fm.GeoJsonTooltip(['id','tooltip'], labels=False),
         popup = popup_html,
         style_function=style_function
     )
+
+    #stjs = foliumjs()
+    #coord_j._template = stjs
+    #coord_fg.add_child(stjs)
 
     marker_cluster = fm.plugins.MarkerCluster(name='stations', show=True)
     marker_cluster.add_to(coord_fg)
@@ -426,7 +445,7 @@ def update_map_pane(event):
         filt_list = filt.value_input.split(',')
         op = ','
     else:
-        filt_list = ['%']
+        filt_list = [filt.value_input,]
         op = ''
     
     iau_list = iau.value_input.split(',')
