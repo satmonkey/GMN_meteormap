@@ -449,7 +449,9 @@ def update_map_pane(event):
         filt_list = [filt.value_input,]
         op = ''
     
+    filt_list = hello = [x.strip(' ') for x in filt_list]
     iau_list = iau.value_input.split(',')
+    iau_list = hello = [x.strip(' ') for x in iau_list]
 
     # detect famous hacking technique and refuse the filter if needed
     if max(len(i) > 6 for i in filt_list) or max(len(j) > 3 for j in iau_list):
