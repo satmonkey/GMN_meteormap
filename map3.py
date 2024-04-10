@@ -454,9 +454,21 @@ def update_map_pane(event):
     # detect famous hacking technique and refuse the filter if needed
     if max(len(i) > 6 for i in filt_list) or max(len(j) > 3 for j in iau_list):
         config.print_time("SQL inject detected... filter denied")
-        filt.value = update_param[0]
-        iau.value = update_param[2]
-        return
+        filt.value_input = update_param[0]
+        iau.value_input = update_param[1]
+
+        # split the filter elements, if used
+        if ';' in filt.value_input:
+            filt_list = filt.value_input.split(';')
+            op = ';'
+        elif ',' in filt.value_input:
+            filt_list = filt.value_input.split(',')
+            op = ','
+        else:
+            filt_list = [filt.value_input,]
+            op = ''
+        
+        iau_list = iau.value_input.split(',')
 
     config.print_time("Checking if data recent...")
 
