@@ -178,6 +178,7 @@ def add_kml(map, filt_list):
     kml_j = fm.GeoJson(
         data=kml_df,
         #tooltip=fm.GeoJsonTooltip(['station'], labels=False),
+        #highlight_function= lambda feat: {'fillColor': 'red'},
         style_function=style_fn_fov,
     )
     #kml_j._id = 'fovj'

@@ -14,6 +14,9 @@ function latLngPop(e) {
             if (layer.contains(latlon) ) {
                 stations = stations + layer.feature.properties.station + ', ';
                 ids.push(layer.feature.id);
+                layer.bindTooltip(layer.feature.properties.station, {
+                    sticky: true
+                });
                 groundplot_007.addLayer(layer);
                 i = i + 1;
             }
@@ -29,6 +32,8 @@ function latLngPop(e) {
     }
     {{this.get_name()}}.setLatLng(e.latlng).setContent(txt + "<br>" + stations).openOn({{this._parent.get_name()}})
 }
+
+
 function clearFOV(e) {
     if (e?.popup?._source?.feature?.geometry?.type in ["LineString","Point"]) {
         return;
@@ -44,6 +49,10 @@ function clearFOV(e) {
         }
     );
 }
+
+
 {{this._parent.get_name()}}.on('click', latLngPop);
 {{this._parent.get_name()}}.on('popupclose', clearFOV);
+
+
                 
