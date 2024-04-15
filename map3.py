@@ -173,11 +173,12 @@ def add_kml(map, filt_list, fov='100'):
     if len(kml_df) == 0:
         return 0
     kml_df = kml_df.set_crs('EPSG:4326')
+    tooltip=fm.GeoJsonTooltip(['station'], sticky=True, labels=False)
     #kml_df.explore(style_kwds={"weight": 10})
     kml_fg = fm.FeatureGroup(name='FOV ' + fov + 'km', show=False)
     kml_j = fm.GeoJson(
         data=kml_df,
-        #tooltip=fm.GeoJsonTooltip(['station'], labels=False),
+        tooltip=tooltip,
         #highlight_function= lambda feat: {'fillColor': 'red'},
         style_function=style_fn_fov,
     )
