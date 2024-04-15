@@ -274,6 +274,7 @@ def Load_Data(file_path):
 
 
 # Downloads all KML 100km files into KML subdirectory
+# Not to be used anymore !!!
 def Load_KMLs(url):
     import requests
     from bs4 import BeautifulSoup
@@ -641,36 +642,44 @@ def MergeMonthsToYear_by_append(year):
     conn.close()
 
 
-# Load all KML files into DB
+# Load all KML files (100,70,25) into DB
 def LoadAllKMLFiles():
-    files = glob.glob(os.path.join("kml/", "*.kml"))
+    fovs = ['100', '70', '25']
     conn = Connect_DB(db)
     c = conn.cursor()
-    config.print_time("refreshing FOV table...")
-    # delete all rows
-    sql = "delete from fov100"
-    c.execute(sql)
-    conn.commit()
 
-    sql = "insert into fov100 values (?,?)"
-    i = 0
-    # save KML as JSON
-    for f in files:
-        #station = f[4:10]
-        kml_gdf = gpd.read_file(f, driver='LIBKML')
-        #json_gdf = gpd.GeoDataFrame.to_json(kml_gdf)
-        #kml_gdf.to_postgis('fov', conn)
-        kml_gdf.to_wkb()
-        kml_gdf.set_geometry('geometry')
-        try:
-            c.execute(sql, (kml_gdf['Name'][0], kml_gdf['geometry'][0].wkb))
-            i += 1
-        except:
-            #config.print_time("duplicate detected...")
-            ...
-    conn.commit()
+
+    for fov in fovs:
+        config.print_time("refreshing FOV table...", fov)
+        files = glob.glob(os.path.join("kml/", "*-" + fov + "km.kml"))
+        # delete all rows
+        sql = "delete from fov" + fov
+        c.execute(sql)
+        conn.commit()
+
+        sql = "insert into fov" + fov + " values (?,?)"
+        i = 0
+        # save KML as JSON
+        for f in files:
+            #station = f[4:10]
+            try:
+                kml_gdf = gpd.read_file(f, driver='LIBKML')
+            except:
+                print(f, ": Error during reading the KML file")
+                continue
+            #json_gdf = gpd.GeoDataFrame.to_json(kml_gdf)
+            #kml_gdf.to_postgis('fov', conn)
+            kml_gdf.to_wkb()
+            kml_gdf.set_geometry('geometry')
+            try:
+                c.execute(sql, (kml_gdf['Name'][0], kml_gdf['geometry'][0].wkb))
+                i += 1
+            except:
+                #config.print_time("duplicate detected...")
+                ...
+        conn.commit()
+        config.print_time("inserted " + str(i) + " " + fov + "km  KML files")
     conn.close()
-    config.print_time("inserted " + str(i) + " FOV KML files")
 
 
 # load station coordinates form the pickle file and inserts into table "stations"
@@ -749,11 +758,11 @@ def LoadStationCoords():
     config.print_time("inserted " + str(i) + " station coords KML files")
 
 
-def AddFOV(filt_list):
+def AddFOV(filt_list, fov='100'):
     if filt_list[0] == '':
         filt_list = ['%']
     conn = Connect_DB(db)
-    sql = "SELECT station, fov as fov FROM fov100 where station like '"
+    sql = "SELECT station, fov as fov FROM fov" + fov + " where station like '"
     for filt in filt_list:
         sql = sql + filt + "%' OR station like '"
     sql = sql + "DEADBEEF'"
@@ -811,9 +820,9 @@ if __name__ == "__main__":
 
     #Load_last2_days()
 
-    LoadStationCoords()
+    #LoadStationCoords()
     #Load_KMLs(stations_file_name)
-    #LoadAllKMLFiles()
+    LoadAllKMLFiles()
 
     #Load_all_days()
     #MergeMonthsToYear_by_append('2021')

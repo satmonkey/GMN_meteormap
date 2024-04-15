@@ -9,7 +9,7 @@ function latLngPop(e) {
     latlon = e.latlng;
     lat = e.latlng['lat'];
     lon = e.latlng['lng'];
-    fovfg_008.getLayers()[0].eachLayer(
+    fovfg_100.getLayers()[0].eachLayer(
         function(layer) { 
             if (layer.contains(latlon) ) {
                 stations = stations + layer.feature.properties.station + ', ';
@@ -25,7 +25,7 @@ function latLngPop(e) {
     if (stations.length > 0) { 
             stations = stations.slice(0,stations.length-2);
             txt = "lat=" + lat.toFixed(4) + ", lon=" + lon.toFixed(4) + "<br>"
-            txt = txt + "Covered by " + i + " camera(s):";
+            txt = txt + "Covered by " + i + " camera(s) at height of 100km:";
     } else {
         //txt = "No coverage";
         return;

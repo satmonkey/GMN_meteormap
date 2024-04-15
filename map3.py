@@ -16,7 +16,7 @@ from fiona.drvsupport import supported_drivers
 import hvplot.pandas
 from datetime import datetime, date, timedelta
 from bokeh.models.formatters import DatetimeTickFormatter, MercatorTickFormatter
-#import numpy as np
+import numpy as np
 import random
 #import branca
 import branca.colormap as cmp
@@ -168,13 +168,13 @@ def get_map(latlon=[45, 20], zoom_start=3):
 
 
 # Adds KML vectors as FOV for station within the filter
-def add_kml(map, filt_list):
-    kml_df = dbtools.AddFOV(filt_list)
+def add_kml(map, filt_list, fov='100'):
+    kml_df = dbtools.AddFOV(filt_list, fov)
     if len(kml_df) == 0:
         return 0
     kml_df = kml_df.set_crs('EPSG:4326')
     #kml_df.explore(style_kwds={"weight": 10})
-    kml_fg = fm.FeatureGroup(name='FOV 100km', show=False)
+    kml_fg = fm.FeatureGroup(name='FOV ' + fov + 'km', show=False)
     kml_j = fm.GeoJson(
         data=kml_df,
         #tooltip=fm.GeoJsonTooltip(['station'], labels=False),
@@ -184,7 +184,7 @@ def add_kml(map, filt_list):
     #kml_j._id = 'fovj'
     #kml_j._name = '007'
     kml_fg._name = 'fovfg'
-    kml_fg._id = '008'
+    kml_fg._id = fov
     kml_fg.add_child(kml_j)
     return kml_fg
 
@@ -449,9 +449,9 @@ def update_map_pane(event):
         filt_list = [filt.value_input,]
         op = ''
     
-    filt_list = hello = [x.strip(' ') for x in filt_list]
+    filt_list = [x.strip(' ') for x in filt_list]
     iau_list = iau.value_input.split(',')
-    iau_list = hello = [x.strip(' ') for x in iau_list]
+    iau_list = [x.strip(' ') for x in iau_list]
 
     # detect famous hacking technique and refuse the filter if needed
     if max(len(i) > 6 for i in filt_list) or max(len(j) > 3 for j in iau_list):
@@ -494,6 +494,9 @@ def update_map_pane(event):
     #meteors = meteors[:100000]
     t_count.value = str(meteors.shape[0])
 
+    # wrap the longitude around 0-360 if needed
+    #meteors['rbeg_lon'] = (meteors['rbeg_lon']+360).where(meteors['rbeg_lon']<0, meteors['rbeg_lon'])
+
     # Updating the Folium meteor map
     #######################################
     # draw meteors to the basemap
@@ -517,10 +520,11 @@ def update_map_pane(event):
         map.keep_in_front(coord_cm)
 
     # KML FOV
-    config.print_time("Adding FOV...")
-    kml_fg = add_kml(map, filt_list)
-    if kml_fg != 0:
-        map.add_child(kml_fg, name='fov')
+    config.print_time("Adding FOVs...")
+    for fov in ['100','70','25']:
+        kml_fg = add_kml(map, filt_list, fov)
+        if kml_fg != 0:
+            map.add_child(kml_fg, name='fov' + fov)
 
     # calculate bounds if autozoom used
     if autozoom.value == True:
