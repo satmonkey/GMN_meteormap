@@ -163,7 +163,6 @@ def get_map(latlon=[45, 20], zoom_start=3):
     MousePosition(position='bottomleft').add_to(m)
     # custom style for layerscontrol
     fm.Element('<style>.leaflet-control-layers-expanded { opacity: 0.5; } </style>').add_to(m.get_root().header)
-    #m.get_root().html.add_child(fm.JavascriptLink('assets/js/macro.js'))
     return m
 
 
@@ -178,14 +177,19 @@ def add_kml(map, filt_list, fov='100'):
     kml_fg = fm.FeatureGroup(name='FOV ' + fov + 'km', show=False)
     kml_j = fm.GeoJson(
         data=kml_df,
-        tooltip=tooltip,
+        #tooltip=tooltip,
         #highlight_function= lambda feat: {'fillColor': 'red'},
         style_function=style_fn_fov,
     )
-    #kml_j._id = 'fovj'
-    #kml_j._name = '007'
+    kml_j._id = 'fovj'
+    kml_j._name = 'i' + fov
+
+    #if fov == '100':
+    #    fmjs = foliumjs()
+    #    kml_j.add_child(fmjs)
+    
     kml_fg._name = 'fovfg'
-    kml_fg._id = fov
+    kml_fg._id = 'i' + fov
     kml_fg.add_child(kml_j)
     return kml_fg
 
@@ -522,6 +526,7 @@ def update_map_pane(event):
 
     # KML FOV
     config.print_time("Adding FOVs...")
+    fov_fg = fm.FeatureGroup(show=True)
     for fov in ['100','70','25']:
         kml_fg = add_kml(map, filt_list, fov)
         if kml_fg != 0:

@@ -9,14 +9,23 @@ function latLngPop(e) {
     latlon = e.latlng;
     lat = e.latlng['lat'];
     lon = e.latlng['lng'];
-    fovfg_100.getLayers()[0].eachLayer(
+    
+    // deactivate FOV layers, if active
+    var sel100 = document.querySelector("#groundplot_007 > div.leaflet-control-container > div.leaflet-top.leaflet-right > div.leaflet-control-layers.leaflet-control-layers-expanded.leaflet-control > section > div.leaflet-control-layers-overlays > label:nth-child(3) > span > input")
+    var sel70 = document.querySelector("#groundplot_007 > div.leaflet-control-container > div.leaflet-top.leaflet-right > div.leaflet-control-layers.leaflet-control-layers-expanded.leaflet-control > section > div.leaflet-control-layers-overlays > label:nth-child(4) > span > input")
+    var sel25 = document.querySelector("#groundplot_007 > div.leaflet-control-container > div.leaflet-top.leaflet-right > div.leaflet-control-layers.leaflet-control-layers-expanded.leaflet-control > section > div.leaflet-control-layers-overlays > label:nth-child(5) > span > input")
+    if (sel100.checked) { sel100.click(); }
+    if (sel70.checked) { sel70.click(); }
+    if (sel25.checked) { sel25.click(); }
+
+    fovfg_i100.getLayers()[0].eachLayer(
         function(layer) { 
             if (layer.contains(latlon) ) {
                 stations = stations + layer.feature.properties.station + ', ';
                 ids.push(layer.feature.id);
-                layer.bindTooltip(layer.feature.properties.station, {
-                    sticky: true
-                });
+                //layer.bindTooltip(layer.feature.properties.station, {
+                //    sticky: true
+                //});
                 groundplot_007.addLayer(layer);
                 i = i + 1;
             }
@@ -38,11 +47,13 @@ function clearFOV(e) {
     if (e?.popup?._source?.feature?.geometry?.type in ["LineString","Point"]) {
         return;
     }
-    var sel = document.querySelector("#groundplot_007 > div.leaflet-control-container > div.leaflet-top.leaflet-right > div.leaflet-control-layers.leaflet-control > section > div.leaflet-control-layers-overlays > label:nth-child(3) > span > input")
+    var sel100 = document.querySelector("#groundplot_007 > div.leaflet-control-container > div.leaflet-top.leaflet-right > div.leaflet-control-layers.leaflet-control-layers-expanded.leaflet-control > section > div.leaflet-control-layers-overlays > label:nth-child(3) > span > input")
+    var sel70 = document.querySelector("#groundplot_007 > div.leaflet-control-container > div.leaflet-top.leaflet-right > div.leaflet-control-layers.leaflet-control-layers-expanded.leaflet-control > section > div.leaflet-control-layers-overlays > label:nth-child(4) > span > input")
+    var sel25 = document.querySelector("#groundplot_007 > div.leaflet-control-container > div.leaflet-top.leaflet-right > div.leaflet-control-layers.leaflet-control-layers-expanded.leaflet-control > section > div.leaflet-control-layers-overlays > label:nth-child(5) > span > input")
     groundplot_007.eachLayer(
         function(layer) {
             if (layer?.feature?.geometry?.type === 'MultiPolygon' && (ids.includes(layer?.feature?.id)) ) {
-                if (!sel.checked) {
+                if (!sel100.checked) {
                     groundplot_007.removeLayer(layer);
                 }
             }
