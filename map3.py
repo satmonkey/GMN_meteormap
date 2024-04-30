@@ -181,8 +181,8 @@ def add_kml(map, filt_list, fov='100'):
         #highlight_function= lambda feat: {'fillColor': 'red'},
         style_function=style_fn_fov,
     )
-    kml_j._id = 'fovj'
-    kml_j._name = 'i' + fov
+    kml_j._name = 'fovj'
+    kml_j._id = 'i' + fov
 
     #if fov == '100':
     #    fmjs = foliumjs()
@@ -190,6 +190,7 @@ def add_kml(map, filt_list, fov='100'):
     
     kml_fg._name = 'fovfg'
     kml_fg._id = 'i' + fov
+    #kml_fg.tooltip = tooltip
     kml_fg.add_child(kml_j)
     return kml_fg
 
@@ -259,8 +260,8 @@ def add_coords(map, filt_list):
 def add_meteors(map, m):
 
     # limit orbits by selecting random 1500 orbits if > 1500
-    if len(m) > 1500:
-        m = gpd.GeoDataFrame.sample(m, 1500, replace=True)
+    if len(m) > 5000:
+        m = gpd.GeoDataFrame.sample(m, 5000, replace=True)
 
     m = m.set_crs('EPSG:4326')
 

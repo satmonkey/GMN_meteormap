@@ -155,7 +155,7 @@ def dict_factory(cursor, row):
 
 def Connect_DB(db):
     #Create DB and format it as needed
-    conn = sqlite3.connect(db, detect_types=sqlite3.PARSE_DECLTYPES)
+    conn = sqlite3.connect("file:" + db + "?mode=rw", uri=True, detect_types=sqlite3.PARSE_DECLTYPES)
     conn.enable_load_extension(True)
     conn.load_extension("mod_spatialite")
     return conn
