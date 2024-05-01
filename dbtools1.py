@@ -800,6 +800,37 @@ def FetchLastTime():
     conn.close()
     return data
 
+
+def updateStationStatus():
+    # get the data from weblog.db
+    try:
+        conn = Connect_DB(db)
+        c = conn.cursor()
+        c.execute("ATTACH DATABASE 'weblog.db' AS weblog")
+        c.execute('delete from main.station_data')
+        c.execute('INSERT INTO main.station_data SELECT * FROM weblog.station_data')
+        #data = c.fetchall()
+        print("Station status updated")
+    except:
+        print("Error occured during the station update")
+    c.close()
+    conn.close()
+
+
+def getStationStatus():
+    conn = Connect_DB(db)
+    c = conn.cursor()
+    sql = 'select station_id as station, status_code as status from station_data'
+    c = conn.cursor()
+    c.execute(sql)
+    data = c.fetchall()
+    c.close()
+    conn.close()
+    return data
+    ...
+
+
+
 if __name__ == "__main__":
     t = time.time()
     stations_file_name = 'https://globalmeteornetwork.org/data/kml_fov/'
@@ -822,7 +853,8 @@ if __name__ == "__main__":
 
     #LoadStationCoords()
     #Load_KMLs(stations_file_name)
-    LoadAllKMLFiles()
+    #LoadAllKMLFiles()
+    updateStationStatus()
 
     #Load_all_days()
     #MergeMonthsToYear_by_append('2021')
