@@ -779,7 +779,8 @@ def AddCoords(filt_list):
     conn = Connect_DB_ro(db)
     # randomize lat and lon
     sql = "SELECT DISTINCT id, AsBinary(GeomFromText('POINT(' || (X(GeomFromWKB(geometry)) + cast(random() % 200 as REAL)/50000) || ' ' || \
-            (Y(GeomFromWKB(geometry)) + cast(random() % 200 as REAL)/50000) || ')' )) as geometry, last_seen from stations where id like '"
+            (Y(GeomFromWKB(geometry)) + cast(random() % 200 as REAL)/50000) || ')' )) as geometry, last_seen, status_code, status_text \
+            from stations JOIN station_data ON stations.id = station_data.station_id where id like '"
 
     for filt in filt_list:
         sql = sql + filt + "%' OR id like '"
@@ -813,8 +814,9 @@ def updateStationStatus():
         print("Station status updated")
     except:
         print("Error occured during the station update")
-    c.close()
-    conn.close()
+    finally:
+        c.close()
+        conn.close()
 
 
 def getStationStatus():

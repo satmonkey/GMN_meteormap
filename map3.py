@@ -209,7 +209,7 @@ def add_coords(map, filt_list):
     coord_df['now'] = time.time()
     # tranform delta seconds to days
     coord_df['delta'] = round((coord_df['now'] - coord_df['last_seen']) / (60 * 60 * 24)- 0.5)
-    coord_df['tooltip'] = 'seen ' + (coord_df['delta'].astype(int)).astype(str) + ' day(s) ago'
+    coord_df['tooltip'] = 'seen ' + (coord_df['delta'].astype(int)).astype(str) + ' day(s) ago '
 
     # create HTML popup
     coord_df['html'] = coord_df.apply(getHTML, axis=1)
@@ -226,10 +226,19 @@ def add_coords(map, filt_list):
         caption='Max. inactivity'
     )
 
+    # colormap of the new status - weblog
+    cstep = cmp.StepColormap(
+        colors=[(0,255,0),'gray','magenta',(153,153,0),(255,102,178),'white','darkgreen',(153,76,0),(255,128,0)],
+        vmin = 0,
+        vmax = 8,
+    )
+
     style_function = lambda x: {
         'weight': 4,
-        'color': clinear(x['properties']['delta']),
-        'fillColor': clinear(x['properties']['delta']),
+        #'color': clinear(x['properties']['delta']),
+        'color': cstep(x['properties']['status_code']),
+        #'fillColor': clinear(x['properties']['delta']),
+        'fillcolor': cstep(x['properties']['status_code']),
         'fillOpacity': 0.75
     }
 
@@ -238,8 +247,8 @@ def add_coords(map, filt_list):
         data=coord_df,
         marker=fm.Circle(),
         #popup=[coord_df['id']],
-        tooltip=fm.GeoJsonTooltip(['id','tooltip'], labels=False),
-        popup = popup_html,
+        tooltip=fm.GeoJsonTooltip(['id','tooltip','status_text'], labels=False),
+        popup=popup_html,
         style_function=style_function
     )
 
