@@ -294,7 +294,7 @@ def add_meteors(map, m):
         svg_style = '<style>svg {background-color: white;}</style>'
         map.get_root().header.add_child(fm.Element(svg_style))
         clinear.add_to(map)
-        popup = fm.GeoJsonPopup(m.drop(columns=drop_list).columns.tolist())
+        popup = fm.GeoJsonPopup(m.drop(columns=drop_list).columns.tolist(), offset=(0,-20))
         tooltip = fm.GeoJsonTooltip(["utc", "shower_code", "peak_mag", "Stations"])
         meteors_j = fm.features.GeoJson(
             m,
