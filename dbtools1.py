@@ -810,6 +810,7 @@ def updateStationStatus():
         c.execute("ATTACH DATABASE 'weblog.db' AS weblog")
         c.execute('delete from main.station_data')
         c.execute('INSERT INTO main.station_data SELECT * FROM weblog.station_data')
+        conn.commit()
         #data = c.fetchall()
         print("Station status updated")
     except:

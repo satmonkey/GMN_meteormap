@@ -228,7 +228,7 @@ def add_coords(map, filt_list):
 
     # colormap of the new status - weblog
     cstep = cmp.StepColormap(
-        colors=[(0,255,0),'gray','magenta',(153,153,0),(255,102,178),'white','darkgreen',(153,76,0),(255,128,0)],
+        colors=[(0,255,0),'gray','magenta',(153,153,0),(255,0,0),'white','darkgreen',(153,76,0),(255,128,0)],
         vmin = 0,
         vmax = 8,
     )
