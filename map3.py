@@ -363,7 +363,7 @@ meteors_pd = pd.DataFrame(columns = list(dbtools.orbit_dtypes.keys()))
 
 class SL(param.Parameterized):
 
-    dt1 = param.CalendarDate(label='Date start', default=datetime.now().date() - timedelta(days=3))
+    dt1 = param.CalendarDate(label='Date start', default=datetime.now().date() - timedelta(days=4))
     dt2 = param.CalendarDate(label='Date end', default=datetime.now().date())
     sl1 = param.Number(label='SoLon start', default = 0.00)
     sly1 = param.Integer(label='Year', default=2024, bounds=(2018,2030))
