@@ -32,6 +32,9 @@ from bokeh.settings import settings
 from bokeh.sampledata.autompg import autompg
 from io import StringIO
 
+import astropy.time
+import astropy.coordinates
+
 settings.resources = 'inline'
 
 #os.environ['PROJ_LIB'] = r'd:\ProgramData\Anaconda3\envs\panel\Library\share\basemap>'
@@ -268,9 +271,9 @@ def add_coords(map, filt_list):
 # Queries the DB for meteors within the filter and draws them on the map
 def add_meteors(map, m):
 
-    # limit orbits by selecting random 1500 orbits if > 1500
-    if len(m) > 5000:
-        m = gpd.GeoDataFrame.sample(m, 5000, replace=True)
+    # limit orbits by selecting random 10000 orbits if > 10000
+    if len(m) > 10000:
+        m = gpd.GeoDataFrame.sample(m, 10000, replace=True)
 
     m = m.set_crs('EPSG:4326')
 
@@ -348,8 +351,62 @@ map_scale3 = (-270, 90)
 # populate the dataframe column names
 meteors_pd = pd.DataFrame(columns = list(dbtools.orbit_dtypes.keys()))
 
-dt1 = pn.widgets.DatetimePicker(name='From', value=datetime.now() - timedelta(days=3),  sizing_mode='fixed', width=160)
-dt2 = pn.widgets.DatetimePicker(name='To', value=datetime.now(),  sizing_mode='fixed', width=160)
+#dt1 = pn.widgets.DatetimePicker(name='From', value=datetime.now() - timedelta(days=3),  sizing_mode='fixed', width=160)
+#dt2 = pn.widgets.DatetimePicker(name='To', value=datetime.now(),  sizing_mode='fixed', width=160)
+
+#sl1 = pn.widgets.EditableFloatSlider(name='SoLong start', start=0, end=360, step=0.1, value=1.57)
+#sl2 = pn.widgets.EditableFloatSlider(name='SoLong end', start=0, end=360, step=0.1, value=1.57)
+
+
+class SL(param.Parameterized):
+
+    dt1 = param.CalendarDate(label='Date start', default=datetime.now().date() - timedelta(days=3))
+    dt2 = param.CalendarDate(label='Date end', default=datetime.now().date())
+    sl1 = param.Number(label='SoLon start', default = 0.00)
+    sly1 = param.Integer(label='Year', default=2024, bounds=(2018,2030))
+    sl2 = param.Number(label='SoLon end', default = 0.00)
+    sly2 = param.Integer(label='Year', default=2024, bounds=(2018,2030))
+    jd1 = 0
+    jd2 = 0
+
+    #dt1 = param.ClassSelector(class_= pn.widgets.DatetimePicker(name='From', value=datetime.now() - timedelta(days=3),  sizing_mode='fixed', width=160))
+    #dt2 = param.ClassSelector(class_= pn.widgets.DatetimePicker(name='From', value=datetime.now(),  sizing_mode='fixed', width=160))
+    #sl1 = pn.widgets.TextInput(name='SoLon start', value='0', sizing_mode='fixed', width=50)
+    #sly1 = pn.widgets.TextInput(name='YEAR', value='2024', sizing_mode='fixed', width=50)
+    #sl2 = pn.widgets.TextInput(name='SoLon end', value='0', sizing_mode='fixed', width=50)
+    #sly2 = pn.widgets.TextInput(name='YEAR', value='2024', sizing_mode='fixed', width=50)
+
+    @param.depends('dt1','dt2', watch=True)
+    def dt2sl(self):
+        pdt1 = self.dt1.strftime("%Y-%m-%d")
+        pdt2 = self.dt2.strftime("%Y-%m-%d")
+        year1 = int(self.dt1.strftime("%Y"))
+        year2 = int(self.dt2.strftime("%Y"))
+        adt1 = astropy.time.Time(pdt1, format='iso', out_subfmt='date_hms')
+        adt2 = astropy.time.Time(pdt2, format='iso', out_subfmt='date_hms')
+        # get Julian dates
+        self.jd1 = adt1.jd
+        self.jd2 = adt2.jd
+        sun1 = astropy.coordinates.get_body("sun", time=adt1)
+        sun2 = astropy.coordinates.get_body("sun", time=adt2)
+        frame1 = astropy.coordinates.GeocentricTrueEcliptic(equinox=adt1)
+        frame2 = astropy.coordinates.GeocentricTrueEcliptic(equinox=adt2)
+        lon1 = sun1.transform_to(frame1).lon.value
+        lon2 = sun2.transform_to(frame2).lon.value
+        self.sl1 = round(lon1*100)/100
+        self.sl2 = round(lon2*100)/100
+        self.sly1 = year1
+        self.sly2 = year2
+        print(lon1, lon2)
+        return lon1, lon2
+
+
+sl = SL()
+
+sl.dt2sl()
+
+#sl.dt1.param.watch(dt2sl, 'value')
+#sl.dt2.param.watch(dt2sl, 'value')
 
 filt = pn.widgets.TextInput(name='Station filter', placeholder="Enter e.g. CZ,DE", value='', sizing_mode='fixed', width=160)
 iau = pn.widgets.TextInput(name='Shower & radiant filter', placeholder='Enter e.g. ORI,PER', value='', sizing_mode='fixed', width=160)
@@ -405,6 +462,9 @@ rasterize = pn.widgets.Checkbox(name='rasterize', sizing_mode='fixed', width=10,
 #formatter_t = DatetimeTickFormatter(months='%b %Y', days='%m/%d')
 #formatter_m = MercatorTickFormatter(dimension='lon')
 
+
+
+
 txt = ''
 with open('help1.txt') as f:
     lines = f.readlines()
@@ -442,7 +502,7 @@ def update_map_pane(event):
 
     config.t0 = time.time()
     meteors = []
-    config.print_time("Updating...", " stations: ", filt.value_input, " showers: ", iau.value_input, " from: ", dt1.value, " to: ", dt2.value)
+    config.print_time("Updating...", " stations: ", filt.value_input, " showers: ", iau.value_input, " from: ", sl.sl1, " to: ", sl.sl2)
     status.value = 'Updating data'
     file_suffix = '_' + "dummy"
 
@@ -501,7 +561,7 @@ def update_map_pane(event):
 
     # main select DB query
     # fetch list of ID's based on filter
-    id_list = dbtools.Fetch_IDs(dt1.value, dt2.value, filt_list, op, iau_list, rp.x, rp.y, zoom_box)
+    id_list = dbtools.Fetch_IDs(sl.jd1, sl.jd2, filt_list, op, iau_list, rp.x, rp.y, zoom_box)
 
     #config.print_time(len(id_list))
     config.print_time("Fetching meteors...")
@@ -589,7 +649,7 @@ def update_map_pane(event):
 
 def update_map_soft(event):
     ...
-    id_list = dbtools.Fetch_IDs(dt1.value, dt2.value, filt_list, iau_list, rp.x, rp.y, zoom_box)
+    id_list = dbtools.Fetch_IDs(sl.dt1, sl.dt2, filt_list, iau_list, rp.x, rp.y, zoom_box)
     config.print_time(len(id_list))
     config.print_time("Fetching meteors...")
     meteors = dbtools.Fetch_Meteors(id_list)
@@ -647,8 +707,21 @@ folium_pane = pn.pane.plot.Folium(sizing_mode="stretch_both", margin=0, min_heig
 
 view = pn.Row(
     pn.Column(
-        dt1,
-        dt2,
+        pn.Column(
+            sl.param.dt1,
+            sl.param.dt2,
+            width=120,
+            height=120,
+        ),
+        pn.Row(
+            sl.param.sl1,
+            sl.param.sly1,
+            #sl.dt2sl,
+        ),
+        pn.Row(
+            sl.param.sl2,
+            sl.param.sly2,
+        ),
         filt,
         iau,
         pn.Row(
@@ -673,7 +746,7 @@ view = pn.Row(
             width=160,
         ),   
         width=190,
-        height=440,
+        height=560,
         #align='start',
         sizing_mode='fixed',
         #height_policy='min',
