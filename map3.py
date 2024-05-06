@@ -35,6 +35,9 @@ from io import StringIO
 import astropy.time
 import astropy.coordinates
 
+from RMS.Routines.SolarLongitude import jd2SolLonSteyaert, solLon2jdSteyaert, unwrapSol
+from RMS.Astrometry.Conversions import jd2Date
+
 settings.resources = 'inline'
 
 #os.environ['PROJ_LIB'] = r'd:\ProgramData\Anaconda3\envs\panel\Library\share\basemap>'
@@ -369,12 +372,22 @@ class SL(param.Parameterized):
     jd1 = 0
     jd2 = 0
 
-    #dt1 = param.ClassSelector(class_= pn.widgets.DatetimePicker(name='From', value=datetime.now() - timedelta(days=3),  sizing_mode='fixed', width=160))
-    #dt2 = param.ClassSelector(class_= pn.widgets.DatetimePicker(name='From', value=datetime.now(),  sizing_mode='fixed', width=160))
-    #sl1 = pn.widgets.TextInput(name='SoLon start', value='0', sizing_mode='fixed', width=50)
-    #sly1 = pn.widgets.TextInput(name='YEAR', value='2024', sizing_mode='fixed', width=50)
-    #sl2 = pn.widgets.TextInput(name='SoLon end', value='0', sizing_mode='fixed', width=50)
-    #sly2 = pn.widgets.TextInput(name='YEAR', value='2024', sizing_mode='fixed', width=50)
+    @param.depends('sl1','sl2')
+    def sl2jd(self):
+        year1 = self.sly1
+        year2 = self.sly2
+        long1 = self.sl1
+        long2 = self.sl2
+        month1 = round(((long1+80)/30)+1)
+        month2 = round(((long2+80)/30)+1)
+        self.jd1 = solLon2jdSteyaert(year1, month1, np.radians(sl.sl1))
+        self.jd2 = solLon2jdSteyaert(year2, month2, np.radians(sl.sl2))
+        d1 = jd2Date(self.jd1)
+        d2 = jd2Date(self.jd2)
+        self.dt1 = datetime(d1[0],d1[1],d1[2],d1[3]).date()
+        self.dt2 = datetime(d2[0],d2[1],d2[2],d2[3]).date()
+        print(self.dt1, self.jd1, self.sl1)
+        print(self.dt2, self.jd2, self.sl2)
 
     @param.depends('dt1','dt2', watch=True)
     def dt2sl(self):
@@ -397,8 +410,9 @@ class SL(param.Parameterized):
         self.sl2 = round(lon2*100)/100
         self.sly1 = year1
         self.sly2 = year2
-        print(lon1, lon2)
-        return lon1, lon2
+        print(pdt1, adt1, lon1)
+        print(pdt2, adt2, lon2)
+        #return lon1, lon2
 
 
 sl = SL()
@@ -561,6 +575,8 @@ def update_map_pane(event):
 
     # main select DB query
     # fetch list of ID's based on filter
+    # first convert solar longitude to Julian date
+    sl.sl2jd()
     id_list = dbtools.Fetch_IDs(sl.jd1, sl.jd2, filt_list, op, iau_list, rp.x, rp.y, zoom_box)
 
     #config.print_time(len(id_list))

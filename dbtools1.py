@@ -340,7 +340,8 @@ def Fetch_IDs(t1, t2, filt_list, station_op, iau_list, x, y, zoom_box):
 
     # time filter
     #sql = sql + "AND (datetime(utc) BETWEEN datetime('" + str(t1) + "') AND datetime('" + str(t2) + "')) LIMIT 100000"
-    sql = sql + 'AND jdt_ref BETWEEN "' + str(t1) + '" AND "' + str(t2) + '" LIMIT 100000'
+    sql = sql + "AND (jdt_ref BETWEEN '" + str(t1) + "' AND '" + str(t2) + "') LIMIT 100000"
+
     config.print_time(sql)
     conn = Connect_DB(db)
     c = conn.cursor()
