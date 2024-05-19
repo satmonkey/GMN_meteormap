@@ -363,31 +363,36 @@ meteors_pd = pd.DataFrame(columns = list(dbtools.orbit_dtypes.keys()))
 
 class SL(param.Parameterized):
 
-    dt1 = param.CalendarDate(label='Date start', default=datetime.now().date() - timedelta(days=4))
+    dt1 = param.CalendarDate(label='Date start', default=datetime.now().date() - timedelta(days=7))
     dt2 = param.CalendarDate(label='Date end', default=datetime.now().date())
-    sl1 = param.Number(label='SoLon start', default = 0.00)
+    sl1 = param.Integer(label='SoLon start', default = 0)
     sly1 = param.Integer(label='Year', default=2024, bounds=(2018,2030))
-    sl2 = param.Number(label='SoLon end', default = 0.00)
+    sl2 = param.Number(label='SoLon end', default = 0)
     sly2 = param.Integer(label='Year', default=2024, bounds=(2018,2030))
+    w = param.Range((0,360), bounds=(0,360), softbounds=(0,360))
     jd1 = 0
     jd2 = 0
 
     @param.depends('sl1','sl2')
     def sl2jd(self):
-        year1 = self.sly1
-        year2 = self.sly2
-        long1 = self.sl1
-        long2 = self.sl2
-        month1 = round(((long1+80)/30)+1)
-        month2 = round(((long2+80)/30)+1)
-        self.jd1 = solLon2jdSteyaert(year1, month1, np.radians(sl.sl1))
-        self.jd2 = solLon2jdSteyaert(year2, month2, np.radians(sl.sl2))
-        d1 = jd2Date(self.jd1)
-        d2 = jd2Date(self.jd2)
-        self.dt1 = datetime(d1[0],d1[1],d1[2],d1[3]).date()
-        self.dt2 = datetime(d2[0],d2[1],d2[2],d2[3]).date()
-        print(self.dt1, self.jd1, self.sl1)
-        print(self.dt2, self.jd2, self.sl2)
+        # limit the number to 2 decimals
+        #self.sl1 = round(self.sl1 * 100)/100
+        #self.sl2 = round(self.sl2 * 100)/100
+        ...
+        #year1 = self.sly1
+        #year2 = self.sly2
+        #long1 = self.sl1
+        #long2 = self.sl2
+        #month1 = round(((long1+80)/30)+1)
+        #month2 = round(((long2+80)/30)+1)
+        #self.jd1 = solLon2jdSteyaert(year1, month1, np.radians(sl.sl1))
+        #self.jd2 = solLon2jdSteyaert(year2, month2, np.radians(sl.sl2))
+        #d1 = jd2Date(self.jd1)
+        #d2 = jd2Date(self.jd2)
+        #self.dt1 = datetime(d1[0],d1[1],d1[2],d1[3]).date()
+        #self.dt2 = datetime(d2[0],d2[1],d2[2],d2[3]).date()
+        #print(self.dt1, self.jd1, self.sl1)
+        #print(self.dt2, self.jd2, self.sl2)
 
     @param.depends('dt1','dt2', watch=True)
     def dt2sl(self):
@@ -406,8 +411,8 @@ class SL(param.Parameterized):
         frame2 = astropy.coordinates.GeocentricTrueEcliptic(equinox=adt2)
         lon1 = sun1.transform_to(frame1).lon.value
         lon2 = sun2.transform_to(frame2).lon.value
-        self.sl1 = round(lon1*100)/100
-        self.sl2 = round(lon2*100)/100
+        self.sl1 = round(lon1)
+        self.sl2 = round(lon2)
         self.sly1 = year1
         self.sly2 = year2
         print(pdt1, adt1, lon1)
@@ -730,14 +735,20 @@ view = pn.Row(
             height=120,
         ),
         pn.Row(
-            sl.param.sl1,
-            sl.param.sly1,
-            #sl.dt2sl,
+            pn.Param(
+                sl.param['sl1'],
+                widgets={'sl1': pn.widgets.IntInput},
+            ),
+        sl.param.sly1,
         ),
         pn.Row(
             sl.param.sl2,
             sl.param.sly2,
         ),
+        #pn.Param(
+        #    sl.param['w'],
+        #    widgets={'w': pn.widgets.EditableRangeSlider},
+        #),
         filt,
         iau,
         pn.Row(
