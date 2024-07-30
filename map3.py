@@ -363,66 +363,97 @@ meteors_pd = pd.DataFrame(columns = list(dbtools.orbit_dtypes.keys()))
 
 class SL(param.Parameterized):
 
-    dt1 = param.CalendarDate(label='Date start', default=datetime.now().date() - timedelta(days=7))
+    dt1 = param.CalendarDate(label='Date start', default=datetime.now().date() - timedelta(days=3))
     dt2 = param.CalendarDate(label='Date end', default=datetime.now().date())
     sl1 = param.Integer(label='SoLon start', default = 0)
     sly1 = param.Integer(label='Year', default=2024, bounds=(2018,2030))
-    sl2 = param.Number(label='SoLon end', default = 0)
+    sl2 = param.Integer(label='SoLon end', default = 0)
     sly2 = param.Integer(label='Year', default=2024, bounds=(2018,2030))
     w = param.Range((0,360), bounds=(0,360), softbounds=(0,360))
     jd1 = 0
     jd2 = 0
+    touch = None
+    
 
-    @param.depends('sl1','sl2')
-    def sl2jd(self):
+    @param.depends('sl1', watch=True)
+    def sl2jd_1(self):
         # limit the number to 2 decimals
         #self.sl1 = round(self.sl1 * 100)/100
         #self.sl2 = round(self.sl2 * 100)/100
         ...
-        #year1 = self.sly1
-        #year2 = self.sly2
-        #long1 = self.sl1
-        #long2 = self.sl2
-        #month1 = round(((long1+80)/30)+1)
-        #month2 = round(((long2+80)/30)+1)
-        #self.jd1 = solLon2jdSteyaert(year1, month1, np.radians(sl.sl1))
-        #self.jd2 = solLon2jdSteyaert(year2, month2, np.radians(sl.sl2))
-        #d1 = jd2Date(self.jd1)
-        #d2 = jd2Date(self.jd2)
-        #self.dt1 = datetime(d1[0],d1[1],d1[2],d1[3]).date()
-        #self.dt2 = datetime(d2[0],d2[1],d2[2],d2[3]).date()
-        #print(self.dt1, self.jd1, self.sl1)
-        #print(self.dt2, self.jd2, self.sl2)
+        if not self.touch:
+            self.touch = 'sl1'
+        else:
+            self.touch = None
+            return
+        year1 = self.sly1
+        long1 = self.sl1
+        month1 = int(((long1+80)/30.4)+1)
+        self.jd1 = solLon2jdSteyaert(year1, month1, np.radians(sl.sl1))
+        d1 = jd2Date(self.jd1)
+        self.dt1 = datetime(d1[0],d1[1],d1[2],d1[3]).date()
+        print(self.dt1, self.jd1, self.sl1)
 
-    @param.depends('dt1','dt2', watch=True)
-    def dt2sl(self):
+
+    @param.depends('sl2', watch=True)
+    def sl2jd_2(self):
+        if not self.touch:
+            self.touch = 'sl2'
+        else:
+            self.touch = None
+            return
+        year2 = self.sly2
+        long2 = self.sl2
+        month2 = int(((long2+80)/30.4)+1)
+        self.jd2 = solLon2jdSteyaert(year2, month2, np.radians(sl.sl2))
+        d2 = jd2Date(self.jd2)
+        self.dt2 = datetime(d2[0],d2[1],d2[2],d2[3]).date()
+        print(self.dt2, self.jd2, self.sl2)
+
+
+    @param.depends('dt1', watch=True)
+    def dt2sl_1(self):
+        if not self.touch:
+            self.touch = 'dt1'
+        else:
+            self.touch = None
+            return
         pdt1 = self.dt1.strftime("%Y-%m-%d")
-        pdt2 = self.dt2.strftime("%Y-%m-%d")
         year1 = int(self.dt1.strftime("%Y"))
-        year2 = int(self.dt2.strftime("%Y"))
         adt1 = astropy.time.Time(pdt1, format='iso', out_subfmt='date_hms')
-        adt2 = astropy.time.Time(pdt2, format='iso', out_subfmt='date_hms')
         # get Julian dates
         self.jd1 = adt1.jd
-        self.jd2 = adt2.jd
         sun1 = astropy.coordinates.get_body("sun", time=adt1)
-        sun2 = astropy.coordinates.get_body("sun", time=adt2)
         frame1 = astropy.coordinates.GeocentricTrueEcliptic(equinox=adt1)
-        frame2 = astropy.coordinates.GeocentricTrueEcliptic(equinox=adt2)
         lon1 = sun1.transform_to(frame1).lon.value
-        lon2 = sun2.transform_to(frame2).lon.value
         self.sl1 = round(lon1)
-        self.sl2 = round(lon2)
         self.sly1 = year1
-        self.sly2 = year2
         print(pdt1, adt1, lon1)
-        print(pdt2, adt2, lon2)
-        #return lon1, lon2
 
+
+    @param.depends('dt2', watch=True)
+    def dt2sl_2(self):
+        if not self.touch:
+            self.touch = 'dt2'
+        else:
+            self.touch = None
+            return
+        pdt2 = self.dt2.strftime("%Y-%m-%d")
+        year2 = int(self.dt2.strftime("%Y"))
+        adt2 = astropy.time.Time(pdt2, format='iso', out_subfmt='date_hms')
+        # get Julian dates
+        self.jd2 = adt2.jd
+        sun2 = astropy.coordinates.get_body("sun", time=adt2)
+        frame2 = astropy.coordinates.GeocentricTrueEcliptic(equinox=adt2)
+        lon2 = sun2.transform_to(frame2).lon.value
+        self.sl2 = round(lon2)
+        self.sly2 = year2
+        print(pdt2, adt2, lon2)
 
 sl = SL()
 
-sl.dt2sl()
+sl.dt2sl_1()
+sl.dt2sl_2()
 
 #sl.dt1.param.watch(dt2sl, 'value')
 #sl.dt2.param.watch(dt2sl, 'value')
@@ -469,20 +500,6 @@ c = pn.widgets.Select(name='z', value='shower_code', options=['v_g', 'v_h', 'pea
                                         'rend_ele', 'shower_code', 'a', 'q', 'QQ'])
 kind = pn.widgets.Select(name='kind', value='points', options=['points','scatter'])
 rasterize = pn.widgets.Checkbox(name='rasterize', sizing_mode='fixed', width=10, value=False)
-#proj = pn.widgets.Select(name='projection', value='Sinusoidal', options=['Sinusoidal','PlateCarree'])
-
-# time pplot
-#x_t = pn.widgets.Select(name='x', value='day', options=['day'])
-#y_t = pn.widgets.Select(name='y', value='traj_id', options=['traj_id'])
-#c_t = pn.widgets.Select(name='z', value='shower_code', options=['v_g','peak_mag','e','duration','rend_ele','shower_code'])
-#kind_t = pn.widgets.Select(name='kind', value='bar', options=['bar', 'area'])
-#by_t = pn.widgets.Select(name='by', value='shower_code', options=['shower_code', None])
-#showers_t = pn.widgets.MultiSelect(value=[''], options=['',])
-#formatter_t = DatetimeTickFormatter(months='%b %Y', days='%m/%d')
-#formatter_m = MercatorTickFormatter(dimension='lon')
-
-
-
 
 txt = ''
 with open('help1.txt') as f:
@@ -581,7 +598,8 @@ def update_map_pane(event):
     # main select DB query
     # fetch list of ID's based on filter
     # first convert solar longitude to Julian date
-    sl.sl2jd()
+    #sl.sl2jd_1()
+    #sl.sl2jd_2()
     id_list = dbtools.Fetch_IDs(sl.jd1, sl.jd2, filt_list, op, iau_list, rp.x, rp.y, zoom_box)
 
     #config.print_time(len(id_list))
@@ -735,11 +753,13 @@ view = pn.Row(
             height=120,
         ),
         pn.Row(
-            pn.Param(
-                sl.param['sl1'],
-                widgets={'sl1': pn.widgets.IntInput},
-            ),
-        sl.param.sly1,
+            #pn.Param(
+                #sl.param['sl1'],
+                #sl.param['sl2'],
+                #widgets={'sl1']: pn.widgets.IntInput},
+            #),
+            sl.param.sl1,
+            sl.param.sly1,
         ),
         pn.Row(
             sl.param.sl2,
