@@ -23,9 +23,10 @@ function latLngPop(e) {
             if (layer.contains(latlon) ) {
                 stations = stations + layer.feature.properties.station + ', ';
                 ids.push(layer.feature.id);
-                //layer.bindTooltip(layer.feature.properties.station, {
-                //    sticky: true
-                //});
+                layer.bindTooltip(layer.feature.properties.station, {
+                    sticky: true
+                
+                });
                 groundplot_007.addLayer(layer);
                 i = i + 1;
             }

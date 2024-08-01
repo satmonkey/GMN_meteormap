@@ -183,7 +183,7 @@ def add_kml(map, filt_list, fov='100'):
     kml_fg = fm.FeatureGroup(name='FOV ' + fov + 'km', show=False)
     kml_j = fm.GeoJson(
         data=kml_df,
-        #tooltip=tooltip,
+        tooltip=tooltip,
         #highlight_function= lambda feat: {'fillColor': 'red'},
         style_function=style_fn_fov,
     )
@@ -404,7 +404,7 @@ class SL(param.Parameterized):
             return
         year2 = self.sly2
         long2 = self.sl2
-        month2 = int(((long2+80)/30.4)+1)
+        month2 = int(((long2+80)/30.4)+2)
         self.jd2 = solLon2jdSteyaert(year2, month2, np.radians(sl.sl2))
         d2 = jd2Date(self.jd2)
         self.dt2 = datetime(d2[0],d2[1],d2[2],d2[3]).date()
