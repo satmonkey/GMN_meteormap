@@ -339,6 +339,12 @@ def download_callback():
     sio.seek(0)
     return sio
 
+def getLastOrbitCalculatedDateTime():
+    last = dbtools.FetchLastTime()
+    last = last[0][0][:-7]
+    last = datetime.strptime(last, '%Y-%m-%d %H:%M:%S')
+    return last
+
 
 ###################################################
 ###################################################
@@ -363,7 +369,8 @@ meteors_pd = pd.DataFrame(columns = list(dbtools.orbit_dtypes.keys()))
 
 class SL(param.Parameterized):
 
-    dt1 = param.CalendarDate(label='Date start', default=datetime.now().date() - timedelta(days=3))
+    #dt1 = param.CalendarDate(label='Date start', default=datetime.now().date() - timedelta(days=datespan))
+    dt1 = param.CalendarDate(label='Date start', default = getLastOrbitCalculatedDateTime().date() - timedelta(days=1))
     dt2 = param.CalendarDate(label='Date end', default=datetime.now().date())
     sl1 = param.Integer(label='SoLon start', default = 0)
     sly1 = param.Integer(label='Year', default=2024, bounds=(2018,2030))
