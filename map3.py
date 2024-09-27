@@ -335,7 +335,7 @@ def w_update(x_range, y_range):
 
 def download_callback():
     sio = StringIO()
-    dv.value.to_csv(sio)
+    dv.value.to_csv(sio, float_format="%.10f")
     sio.seek(0)
     return sio
 
