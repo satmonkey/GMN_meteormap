@@ -301,7 +301,7 @@ def add_meteors(map, m):
     drop_list = ['geometry', 'fov_end', 'fov_beg', 'mfe', 'Qc', 'f_param', 'peak_ht', 'rend_lon', \
                  'rend_lat', 'rbeg_lon', 'rbeg_lat', 'v_avg', 'elevation_apparent_norot', \
                  'azimuth_apparent_norot', 'dec_norot', 're_norot', 'Tj', 'T', 'n', 'mean_anomaly', 'true_anomaly', \
-                 'q', 'b', 'pi']
+                 'b', 'pi']
 
     # create overlay for meteors
     if m.shape[0] > 0:
@@ -699,7 +699,7 @@ def update_map_soft(event):
     config.print_time(len(id_list))
     config.print_time("Fetching meteors...")
     meteors = dbtools.Fetch_Meteors(id_list)
-    meteors = meteors[:100000]
+    meteors = meteors[:50000]
     t_count.value = str(meteors.shape[0])
 
 
