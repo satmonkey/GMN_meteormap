@@ -708,7 +708,7 @@ def update_map_soft(event):
 def update_map_pane_period(dayss):
     folium_pane.loading = True
     config.print_time("Manual data refresh triggered...")
-    dbtools.Load_last2_days(2)
+    dbtools.Load_days(3,2)
     new_count = dbtools.traj_count()
     config.print_time("current count:", traj_counter.value)
     config.print_time("new count:", new_count)

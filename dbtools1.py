@@ -494,6 +494,10 @@ def Load_period_url_list(period):
         page = requests.get(url_daily).text
         soup = BeautifulSoup(page, 'html.parser')
         url_list = [url_daily + '/' + node.get('href') for node in soup.find_all('a') if node.get('href').endswith(ext)]
+        # omit non generic links
+        #print(url_list)
+        url_list = list(filter(lambda url: 'solrange' in url, url_list))
+        print("urls count:", len(url_list))
     elif period == 'month':
         page = requests.get(url_monthly).text
         soup = BeautifulSoup(page, 'html.parser')
@@ -561,11 +565,11 @@ def Load_all_days():
 
 
 # downloads last 2 days into DB
-def Load_last2_days(days):
+def Load_days(daysago=3, count=2):
     data = Load_period_url_list('day')
     n = 0
     # slice the file list, omit last 2 files
-    data = data[-2-days:-2]
+    data = data[-daysago:-daysago+count]
     for d in data:
         f = os.path.basename(urlparse(d).path)
         config.print_time("Downloading " + f + "...")
@@ -859,12 +863,12 @@ if __name__ == "__main__":
     #for month in months:
     #    Load_period(month, 'month')
 
-    #Load_last2_days()
+    Load_days(55,10)
 
     #LoadStationCoords()
     #Load_KMLs(stations_file_name)
     #LoadAllKMLFiles()
-    updateStationStatus()
+    #updateStationStatus()
 
     #Load_all_days()
     #MergeMonthsToYear_by_append('2021')
