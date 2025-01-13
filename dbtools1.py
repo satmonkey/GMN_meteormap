@@ -155,7 +155,7 @@ def dict_factory(cursor, row):
 
 def Connect_DB(db):
     #Create DB and format it as needed
-    conn = sqlite3.connect("file:" + db + "?mode=rw", uri=True, detect_types=sqlite3.PARSE_DECLTYPES)
+    conn = sqlite3.connect("file:" + db + '?mode=rw', uri=True, detect_types=sqlite3.PARSE_DECLTYPES)
     conn.enable_load_extension(True)
     conn.load_extension("mod_spatialite")
     return conn
@@ -218,7 +218,13 @@ def Load_Data(file_path):
     for i, row in df.iterrows():
         p1 = Point(row['rbeg_lon'], row['rbeg_lat'])
         p2 = Point(row['rend_lon'], row['rend_lat'])
-        ls = LineString([p1, p2]).wkt
+        try:
+             ls = LineString([p1, p2]).wkt
+        except:
+             print("Error when creating Linestring:", row['traj_id'], p1, p2)
+             p1 = '(0 1)'
+             p2 = '(0 1)'
+             #continue
         wkt_list.append(ls)
     df['geometry'] = wkt_list
     df['geometry'] = df['geometry'].apply(wkt.loads)
@@ -242,12 +248,24 @@ def Load_Data(file_path):
     if gdf.shape[0] > 0:
         #insert into temporary table
         conn = Connect_DB(db)
+        # remove duplicates if any
+        gdf = gdf.drop_duplicates(['traj_id'])
         gdf.to_sql('temp_gdf', conn, if_exists='replace', index=False, dtype=orbit_dtypes)
         # insert new records into main table avoiding duplicates
-        sql = 'insert into ' + table + ' select * from temp_gdf where temp_gdf.traj_id not in \
-            (select traj_id from ' + table + ')'
+        conn.close()
+        conn = Connect_DB(db)
+        sql = 'insert into ' + table + ' select * from temp_gdf where temp_gdf.traj_id not in (select traj_id from ' + table + ')'
+        print(sql)
         c = conn.cursor()
-        c.execute(sql)
+        while(True):
+            try:
+                conn.execute(sql)
+            except Exception as err:
+                print('Query Failed: %s\nError: %s' % (sql, str(err)))
+                gdf.drop('geometry',axis=1).to_csv(r'plswork.csv') 
+            else:
+                break
+                
         conn.commit()
 
         # update trajs
@@ -260,10 +278,9 @@ def Load_Data(file_path):
         #config.print_time(sql)
         c.execute(sql)
         conn.commit()
-        c.close()
-        conn.close()
 
-
+    c.close()
+    conn.close()
     #if gdf.shape[0] > 0:
     #    gdf.to_sql(table, conn, if_exists='append', index=False, dtype=orbit_dtypes)
     #    Orbits.Create_Orbit_List(gdf)
@@ -565,11 +582,13 @@ def Load_all_days():
 
 
 # downloads last 2 days into DB
-def Load_days(daysago=3, count=2):
+def Load_days(daysago=2, count=2):
     data = Load_period_url_list('day')
     n = 0
     # slice the file list, omit last 2 files
-    data = data[-daysago:-daysago+count]
+    data = data[len(data)-daysago:len(data)-daysago+count]
+    print("About to get ", len(data), "files...")
+    print(data)
     for d in data:
         f = os.path.basename(urlparse(d).path)
         config.print_time("Downloading " + f + "...")
@@ -715,6 +734,7 @@ def LoadStationCoords():
         sql = "delete from stations"
         c.execute(sql)
         conn.commit()
+        print("stations table purged...")
     except:
         config.print_time("Error during table cleanup")
         conn.close()
@@ -761,9 +781,9 @@ def LoadStationCoords():
             i += 1
         except:
             config.print_time("insert failed...")
-            conn.close()
+            #conn.close()
             ...
-
+    print("DB:", conn)
     conn.commit()
     conn.close()
     config.print_time("inserted " + str(i) + " station coords KML files")
@@ -856,14 +876,17 @@ if __name__ == "__main__":
     # Converts TEXT to np.array when selecting
     #sqlite3.register_converter("array", convert_array)
 
-    conn = Connect_DB(db)  # Create DB
+    #conn = Connect_DB(db)  # Create DB
     #config.print_time(traj_count())
 
     #months = Load_period_table_list('month')
     #for month in months:
     #    Load_period(month, 'month')
 
-    Load_days(55,10)
+    Load_days(11,10)
+    #Load_Data('https://globalmeteornetwork.org/data/traj_summary_data/monthly/traj_summary_monthly_202412.txt')
+    #print("loaded...")
+    #Load_Data('https://globalmeteornetwork.org/data/traj_summary_data/monthly/traj_summary_monthly_202411.txt')
 
     #LoadStationCoords()
     #Load_KMLs(stations_file_name)
@@ -873,4 +896,4 @@ if __name__ == "__main__":
     #Load_all_days()
     #MergeMonthsToYear_by_append('2021')
     #config.print_time(data[0])
-    conn.close()
+    #conn.close()
