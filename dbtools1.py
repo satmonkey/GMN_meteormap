@@ -17,7 +17,8 @@ import glob
 from urllib.parse import urlparse
 import pickle
 from fiona.drvsupport import supported_drivers
-from shapely.geometry import Point
+from shapely.geometry import Point, LineString
+from shapely import wkt,wkb
 
 import warnings
 warnings.filterwarnings('ignore')
@@ -189,6 +190,8 @@ def traj_count():
 
 
 
+
+
 # loads orbits data into the DB from given file name
 def Load_Data(file_path):
     from shapely.geometry import Point, LineString
@@ -203,16 +206,21 @@ def Load_Data(file_path):
 
     # load data
     config.print_time("Loading " + file_path + "...")
-    df = pd.read_csv(file_path, delimiter=';', skiprows=4, header=None, skipinitialspace=True)
+    df = pd.read_csv(file_path, delimiter=';', skiprows=4, header=None, skipinitialspace=True, comment='#')
     config.print_time("Loading complete...")
     df = df.T
     df = df.iloc[list(orbit_fields.keys())].T
     df.columns = orbit_fields.values()
 
+
+    #df['L_g'] = pd.to_numeric(df['L_g'], errors='0.01')
+    #df['la_sun'] = pd.to_numeric(df['la_sun'], errors='0.01')
+
     df['SCE_g'] = df['L_g'] - df['la_sun']
     df['SCE_h'] = df['L_h'] - df['la_sun']
     df['SCE_g'] = df['SCE_g'] + (360 * (df['SCE_g'] < 0))
     df['SCE_h'] = df['SCE_h'] + (360 * (df['SCE_h'] < 0))
+    df = fix_dateline(df)
 
     wkt_list = []
     for i, row in df.iterrows():
@@ -249,7 +257,9 @@ def Load_Data(file_path):
         #insert into temporary table
         conn = Connect_DB(db)
         # remove duplicates if any
+        n = gdf.shape[0]
         gdf = gdf.drop_duplicates(['traj_id'])
+        print("removed duplicates:", n - gdf.shape[0])
         gdf.to_sql('temp_gdf', conn, if_exists='replace', index=False, dtype=orbit_dtypes)
         # insert new records into main table avoiding duplicates
         conn.close()
@@ -462,6 +472,25 @@ def Fetch_Data(t1, t2, filt_list, iau_list, x, y, zoom_box):
     conn.close()
     return data
 
+
+def fix_dateline(mets):
+    mets['rbeg_lon'].mask(((abs(mets['rbeg_lon'] - mets['rend_lon']) > 180) & (mets['rbeg_lon'] < 0)), mets['rbeg_lon'] + 360, inplace=True)
+    mets['rend_lon'].mask(((abs(mets['rbeg_lon'] - mets['rend_lon']) > 180) & (mets['rend_lon'] < 0)), mets['rend_lon'] + 360, inplace=True)
+    return mets
+
+
+def insert_new_geo(d):
+    d = fix_dateline(d)
+    p1 = list(zip(d['rbeg_lon'], d['rbeg_lat']))
+    p2 = list(zip(d['rend_lon'], d['rend_lat']))
+    lines = []
+    lines = list(zip(p1,p2))
+    d['geometry'] = [LineString(g).wkt for g in lines]
+    d['geometry'] = d['geometry'].apply(wkt.loads)
+    d.set_crs('EPSG:4326')
+    return d
+
+
 # fetch meteors from the DB using filters
 def Fetch_Meteors(id_list):
     #id_list = id_list.join(',')
@@ -481,6 +510,7 @@ def Fetch_Meteors(id_list):
     t0 = datetime.datetime.now()
     conn = Connect_DB_ro(db)
     data = gpd.read_postgis(sql, conn, geom_col='geometry')
+    data = insert_new_geo(data)
     conn.close()
     #config.print_time("The query took: ", int((datetime.datetime.now() - t0).total_seconds()), " seconds")
     #config.print_time(data)
@@ -883,8 +913,8 @@ if __name__ == "__main__":
     #for month in months:
     #    Load_period(month, 'month')
 
-    Load_days(11,10)
-    #Load_Data('https://globalmeteornetwork.org/data/traj_summary_data/monthly/traj_summary_monthly_202412.txt')
+    #Load_days(11,10)
+    Load_Data('https://globalmeteornetwork.org/data/traj_summary_data/traj_summary_yearly_2024.txt')
     #print("loaded...")
     #Load_Data('https://globalmeteornetwork.org/data/traj_summary_data/monthly/traj_summary_monthly_202411.txt')
 

@@ -339,11 +339,18 @@ def download_callback():
     sio.seek(0)
     return sio
 
+
 def getLastOrbitCalculatedDateTime():
     last = dbtools.FetchLastTime()
     last = last[0][0][:-7]
     last = datetime.strptime(last, '%Y-%m-%d %H:%M:%S')
     return last
+
+
+def fix_dateline(mets):
+    #mets['rend_lon'].mask(mets['rend_lon'] - mets['rbeg_lon'] > 180, mets['rend_lon']-360, inplace=True)
+    mets['rbeg_lon'].mask(mets['rbeg_lon'] < 0, mets['rbeg_lon'] + 360, inplace=True)
+    return mets
 
 
 ###################################################
@@ -370,7 +377,7 @@ meteors_pd = pd.DataFrame(columns = list(dbtools.orbit_dtypes.keys()))
 class SL(param.Parameterized):
 
     #dt1 = param.CalendarDate(label='Date start', default=datetime.now().date() - timedelta(days=datespan))
-    dt1 = param.CalendarDate(label='Date start', default = getLastOrbitCalculatedDateTime().date() - timedelta(days=1))
+    dt1 = param.CalendarDate(label='Date start', default = getLastOrbitCalculatedDateTime().date() - timedelta(days=2))
     dt2 = param.CalendarDate(label='Date end', default=datetime.now().date())
     sl1 = param.Integer(label='SoLon start', default = 0)
     sly1 = param.Integer(label='Year', default=2024, bounds=(2018,2030))
@@ -623,6 +630,7 @@ def update_map_pane(event):
     # draw meteors to the basemap
     config.print_time(t_count.value, " meteors")
     config.print_time("Drawing meteors...")
+    #meteors = fix_dateline(meteors)
     met_count = add_meteors(map, meteors)
 
     # after drawing due to JSON error
@@ -708,7 +716,7 @@ def update_map_soft(event):
 def update_map_pane_period(dayss):
     folium_pane.loading = True
     config.print_time("Manual data refresh triggered...")
-    dbtools.Load_days(3,2)
+    dbtools.Load_days()
     new_count = dbtools.traj_count()
     config.print_time("current count:", traj_counter.value)
     config.print_time("new count:", new_count)
